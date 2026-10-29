@@ -79,9 +79,12 @@ Invariants (enforced in `Game`):
 6. Hold → `globalScore += roundScore`, `roundScore = 0`. If `globalScore ≥ winningScore`, the Game is `WON` with `winnerId` set and no Turn pass. Otherwise the Turn passes.
 7. `abandon()`: `IN_PROGRESS` becomes `ABANDONED`, with no winner.
 
+**Bot** (domain): the system User `bot`, plus a `BotStrategy` port: `decide(state) → 'ROLL' | 'HOLD'`. The default `HoldAtTwentyStrategy` Holds when `roundScore ≥ 20` or when Holding would Win. A `BotPlayer` domain service runs one Bot Turn against `Game` (using the same `roll`/`hold` methods) and returns `BotStep[]` (`{ kind: 'ROLL', dice, bust } | { kind: 'HOLD', won }`).
+
 Application (`GamesService`):
 - **create:** abandon each User's active Game, then save the new one.
 - **hold:** if `won`, call `users.recordWin(winnerId)` in the same call. There is no event bus.
+- **Bot Turn:** after a human Hold (not Won) or Bust, if the current Player is `bot`, run `BotPlayer` in the same call, record a Bot Win if it happens, and save once. The steps go into `GameStateDto.botSteps` (empty otherwise). R8's abandon skips `bot` (ADR 0003).
 
 ## API
 
@@ -115,6 +118,8 @@ Shape is always `ApiErrorDto { statusCode, error, message }`.
 
 The two seats each hold `{ token, user }` in `SeatContext`. The board renders one `GameStateDto` from `useQuery(['game', id])`. Roll and Hold mutations use the token of the seat whose `user.id === currentPlayerId`. Each mutation's response is written into the cache with `setQueryData`, so there's no refetch. Buttons are enabled from `currentPlayerId` alone; the UI makes no rule decisions. `lastRoll.bust` triggers the 1.5s `BustBanner` lock.
 
+Bot replay: when a response has `botSteps`, `useBotReplay` keeps the previous board state and plays each step (thinking indicator 600–1200 ms → dice → score/banner), then shows the server's final state, including the win overlay. Controls are locked during the replay; Space or a click skips to the final state. No requests are made during the replay.
+
 ## Slices for /developer
 
 | # | Slice | Done when |
@@ -126,3 +131,4 @@ The two seats each hold `{ token, user }` in `SeatContext`. The board renders on
 | S4 | Web shell: ApiClient, SeatContext, two login seats | Both seats log in |
 | S5 | Game board: New Game form, scores, dice, Roll/Hold, winner | Full game playable in browser |
 | S6 | Extras: Win Count display, Bust lock banner | AC8.2, AC9.x |
+| S7 | Bot opponent: `bot` User + login block, `BotStrategy`/`BotPlayer` + unit tests, `botSteps` in contracts and API, "vs Bot" in the New Game form, `useBotReplay` with thinking animation | e2e AC10.1–10.6 (seeded dice), UI AC10.7–10.9 |

@@ -25,3 +25,9 @@
 **Abandon** — Ending a Game without a winner by starting a New Game.
 
 **Win Count** — Number of Games a User has won.
+
+**Bot** — A system-owned User that plays as a Player against a human. Unlike a human User, a Bot may take part in many Games at once.
+
+**Bot Strategy** — The rule a Bot follows to decide between Roll and Hold during its Turn.
+
+**Bot Turn** — A Turn taken by the Bot Player; shown to the human step by step, like a real opponent's Turn.
