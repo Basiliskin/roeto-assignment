@@ -27,6 +27,8 @@ Error contract: **401** unauthenticated · **403** not your Turn / not a Player 
 - **AC1.2** Given an existing username (any case), when I log in, then I get a JWT for the same User.
 - **AC1.3** Given a username that breaks R7, when I log in, then 400.
 - **AC1.4** Given no or an invalid token, when I call any game endpoint, then 401.
+- **AC1.5 (UI)** The Login screen has just a username input and a Log in button.
+- **AC1.6 (UI)** After login, a default Game is created automatically: opponent `player2` (or `player1` if you are `player2`), logged in on the same page with their own JWT, Winning Score 100, and you start. The opponent and target can be changed through New Game (S2/S7).
 
 ### S2 — Create Game (Must)
 *As a User I want to start a Game against an opponent with a chosen Winning Score so that we can play.*

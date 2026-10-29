@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Variant A — Split Screen</title>
+<!-- THROWAWAY PROTOTYPE: mock logic only. Never imported by apps/web. -->
+<style>
+  :root {
+    --accent: #c62828; --accent-soft: #fdecea; --ink: #222; --muted: #595959;
+    --bg: #fafafa; --panel-active: #fff; --panel-idle: #ececec;
+    --radius: 6px; --gap: 16px; --font: "Lato", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: var(--font); color: var(--ink); background: #4a4a4a; min-height: 100vh; display: grid; place-items: center; padding: 16px; }
+  .card { background: var(--bg); width: min(1000px, 100%); border-radius: 10px; overflow: hidden; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,.3); }
+  .hidden { display: none !important; }
+  button { font: inherit; cursor: pointer; }
+  button:disabled { cursor: not-allowed; opacity: .45; }
+  :focus-visible { outline: 3px solid #1565c0; outline-offset: 2px; }
+
+  /* login */
+  .login { display: grid; grid-template-columns: 1fr 1fr; }
+  .seat { padding: 40px 24px; display: grid; gap: 12px; align-content: start; }
+  .seat:nth-child(2) { background: #fff; }
+  .seat h2 { margin: 0; font-weight: 300; letter-spacing: 2px; text-transform: uppercase; }
+  input { font: inherit; padding: 10px; border: 1px solid #999; border-radius: var(--radius); width: 100%; }
+  .btn { background: var(--accent); color: #fff; border: 0; padding: 10px 16px; border-radius: var(--radius); }
+  .btn-ghost { background: none; border: 0; color: var(--ink); font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; padding: 8px 12px; display: inline-flex; gap: 8px; align-items: center; }
+  .btn-ghost .ico { color: var(--accent); font-size: 1.5rem; }
+  .ok { color: #2e7d32; }
+  .err { color: var(--accent); font-size: .9rem; min-height: 1.2em; }
+
+  /* board */
+  .board { display: grid; grid-template-columns: 1fr 1fr; min-height: 520px; position: relative; }
+  .panel { padding: 90px 16px 40px; display: flex; flex-direction: column; align-items: center; gap: 18px; background: var(--panel-idle); transition: background .3s; }
+  .panel.active { background: var(--panel-active); }
+  .panel .name { font-size: clamp(1.4rem, 4vw, 2.6rem); font-weight: 300; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); display: flex; align-items: center; gap: 10px; }
+  .panel.active .name { color: var(--ink); font-weight: 400; }
+  .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); visibility: hidden; }
+  .panel.active .dot { visibility: visible; }
+  .turn-label { font-size: .85rem; font-weight: 700; color: var(--accent); visibility: hidden; text-transform: uppercase; letter-spacing: 1px; }
+  .panel.active .turn-label { visibility: visible; }
+  .global { font-size: clamp(3rem, 10vw, 5.5rem); font-weight: 300; color: var(--accent); line-height: 1; }
+  .wins { font-size: .9rem; color: var(--muted); }
+  .current { background: var(--accent); color: #fff; width: min(180px, 80%); text-align: center; padding: 12px; border-radius: var(--radius); margin-top: auto; }
+  .current small { display: block; text-transform: uppercase; letter-spacing: 1px; font-size: .75rem; }
+  .current b { font-size: 2rem; font-weight: 400; }
+  .panel.winner { background: var(--accent); }
+  .panel.winner .name, .panel.winner .global { color: #fff; }
+
+  .center { position: absolute; left: 50%; top: 0; bottom: 0; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; padding: 16px 0; gap: 10px; pointer-events: none; }
+  .center > * { pointer-events: auto; }
+  .target { font-size: .85rem; color: var(--muted); background: #fff; padding: 2px 10px; border-radius: 99px; border: 1px solid #ddd; }
+  .dice { display: flex; gap: 8px; margin-top: 90px; }
+  .die { width: 64px; height: 64px; background: #fff; border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,.2); display: grid; place-items: center; font-size: 2rem; font-weight: 700; }
+  .die.roll { animation: spin .4s ease-out; }
+  @keyframes spin { from { transform: rotate(-200deg) scale(.6); } }
+  .roll-note { font-size: .9rem; min-height: 1.3em; background: #fff; padding: 2px 8px; border-radius: 4px; }
+  .controls { margin-top: auto; display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,.85); border-radius: var(--radius); }
+  .why { font-size: .8rem; color: var(--muted); text-align: center; max-width: 220px; min-height: 1.2em; }
+
+  .banner { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(198,40,40,.92); color: #fff; font-size: clamp(1.6rem, 6vw, 3rem); text-align: center; animation: shake .5s; z-index: 5; }
+  @keyframes shake { 20%,60% { transform: translateX(-8px); } 40%,80% { transform: translateX(8px); } }
+  .winbar { padding: 16px; text-align: center; background: var(--accent-soft); font-size: 1.1rem; }
+  .newgame { padding: 14px 16px; display: flex; gap: 8px; flex-wrap: wrap; align-items: end; justify-content: center; border-bottom: 1px solid #ddd; background: #fff; }
+  .newgame label { display: grid; font-size: .8rem; color: var(--muted); gap: 2px; }
+  .newgame input { width: 130px; }
+  .dev { position: fixed; bottom: 8px; right: 8px; font-size: .75rem; background: #fff; padding: 6px; border-radius: 6px; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+  @media (max-width: 600px) {
+    .login { grid-template-columns: 1fr; }
+    .board { grid-template-columns: 1fr; }
+    .panel { padding: 20px 16px; flex-direction: row; flex-wrap: wrap; justify-content: space-between; }
+    .panel .name { font-size: 1.2rem; }
+    .global { font-size: 2.6rem; }
+    .current { width: auto; margin: 0; padding: 6px 12px; }
+    .current b { font-size: 1.3rem; }
+    .center { position: static; transform: none; order: 2; padding: 16px; }
+    .panel:last-of-type { order: 3; }
+    .dice { margin-top: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <!-- seats / login -->
+  <section id="login" class="login" aria-label="Log in both seats">
+    <form class="seat" data-seat="0"><h2>Seat 1</h2><label>Username <input name="u" autocomplete="off" placeholder="alice"></label><button class="btn">Log in</button><div class="err"></div></form>
+    <form class="seat" data-seat="1"><h2>Seat 2</h2><label>Username <input name="u" autocomplete="off" placeholder="bob"></label><button class="btn">Log in</button><div class="err"></div></form>
+  </section>
+
+  <section id="game" class="hidden">
+    <form id="newgame" class="newgame" aria-label="New game">
+      <label>Winning Score<input id="ws" type="number" min="10" max="1000" value="100"></label>
+      <button class="btn-ghost"><span class="ico" aria-hidden="true">⊕</span>New Game</button>
+      <span class="err" id="wserr"></span>
+    </form>
+    <div id="winbar" class="winbar hidden" role="status"></div>
+    <div class="board" id="board">
+      <div class="panel" id="p0"></div>
+      <div class="center">
+        <span class="target" id="target"></span>
+        <div class="dice" id="dice"><div class="die">–</div><div class="die">–</div></div>
+        <div class="roll-note" id="note"></div>
+        <div class="controls">
+          <button class="btn-ghost" id="roll"><span class="ico" aria-hidden="true">⟳</span>Roll dice <kbd>R</kbd></button>
+          <button class="btn-ghost" id="hold"><span class="ico" aria-hidden="true">⤓</span>Hold <kbd>H</kbd></button>
+        </div>
+        <div class="why" id="why"></div>
+      </div>
+      <div class="panel" id="p1"></div>
+    </div>
+  </section>
+  <div id="live" class="sr" aria-live="assertive"></div>
+</div>
+<label class="dev"><input type="checkbox" id="force"> next roll = 6&amp;6 (demo)</label>
+
+<script>
+// ---- MOCK API (shape matches GameStateDto from packages/contracts) ----
+const seats = [null, null];
+const winCounts = {};
+let state = null, locked = false;
+const rnd = () => 1 + Math.floor(Math.random() * 6);
+const api = {
+  login(u) {
+    if (!/^[a-zA-Z0-9_]{3,20}$/.test(u)) throw { statusCode: 400, message: 'Username: 3–20 letters, digits or _' };
+    const id = u.toLowerCase(); winCounts[id] ??= 0;
+    return { accessToken: 'tok-' + id, user: { id, username: u, winCount: winCounts[id] } };
+  },
+  createGame(ws) {
+    if (!Number.isInteger(ws) || ws < 10 || ws > 1000) throw { statusCode: 400, message: 'Winning Score must be 10–1000' };
+    const p = s => ({ userId: s.user.id, username: s.user.username, globalScore: 0, roundScore: 0, winCount: winCounts[s.user.id] });
+    state = { id: crypto.randomUUID(), status: 'IN_PROGRESS', winningScore: ws, players: [p(seats[0]), p(seats[1])], currentPlayerId: seats[0].user.id, winnerId: null, lastRoll: null };
+    return state;
+  },
+  roll(uid, forced) {
+    guard(uid);
+    const dice = forced ? [6, 6] : [rnd(), rnd()], bust = dice[0] === 6 && dice[1] === 6;
+    const me = cur();
+    if (bust) { me.roundScore = 0; pass(); } else me.roundScore += dice[0] + dice[1];
+    state.lastRoll = { dice, bust }; return state;
+  },
+  hold(uid) {
+    guard(uid);
+    const me = cur(); me.globalScore += me.roundScore; me.roundScore = 0; state.lastRoll = null;
+    if (me.globalScore >= state.winningScore) { state.status = 'WON'; state.winnerId = me.userId; state.currentPlayerId = null; me.winCount = ++winCounts[me.userId]; }
+    else pass();
+    return state;
+  },
+};
+const cur = () => state.players.find(p => p.userId === state.currentPlayerId);
+const pass = () => { state.currentPlayerId = state.players.find(p => p.userId !== state.currentPlayerId).userId; };
+function guard(uid) {
+  if (state.status !== 'IN_PROGRESS') throw { statusCode: 409, message: 'Game is over' };
+  if (uid !== state.currentPlayerId) throw { statusCode: 403, message: 'Not your Turn' };
+}
+
+// ---- UI (renders state only) ----
+const $ = id => document.getElementById(id);
+const say = t => { $('live').textContent = ''; setTimeout(() => $('live').textContent = t, 30); };
+document.querySelectorAll('.seat').forEach(f => f.addEventListener('submit', e => {
+  e.preventDefault();
+  const i = +f.dataset.seat, u = f.u.value.trim(), err = f.querySelector('.err');
+  try {
+    const r = api.login(u);
+    if (seats[1 - i]?.user.id === r.user.id) throw { message: 'Pick a different User than the other seat' };
+    seats[i] = r; err.textContent = '';
+    f.innerHTML = `<h2>Seat ${i + 1}</h2><p class="ok">✓ Logged in as <b>${r.user.username}</b></p>`;
+    if (seats[0] && seats[1]) { $('login').classList.add('hidden'); $('game').classList.remove('hidden'); newGame(); }
+  } catch (x) { err.textContent = x.message; }
+}));
+$('newgame').addEventListener('submit', e => { e.preventDefault(); newGame(); });
+function newGame() {
+  try { api.createGame(Number($('ws').value)); $('wserr').textContent = ''; render(); say(`New game. First to ${state.winningScore}. ${cur().username}'s turn.`); }
+  catch (x) { $('wserr').textContent = x.message; }
+}
+function act(kind) {
+  if (locked || !state || state.status !== 'IN_PROGRESS') return;
+  const token = seats.find(s => s.user.id === state.currentPlayerId); // the seat whose turn it is acts
+  const before = cur().username;
+  if (kind === 'roll') {
+    api.roll(token.user.id, $('force').checked); $('force').checked = false;
+    if (state.lastRoll.bust) return bust(before);
+    render(true); const [a, b] = state.lastRoll.dice; say(`${before} rolled ${a} and ${b}, plus ${a + b}. Round ${cur().roundScore}.`);
+  } else {
+    api.hold(token.user.id); render();
+    say(state.status === 'WON' ? `${before} wins!` : `${before} holds. ${cur().username}'s turn.`);
+  }
+}
+function bust(who) {
+  locked = true; render(true);
+  const b = document.createElement('div'); b.className = 'banner'; b.innerHTML = `🎲🎲 6 &amp; 6 — Bust!<br><small>${who} loses the round</small>`;
+  $('board').appendChild(b); say(`Bust! ${who} rolled 6 and 6 and loses the round score. ${cur().username}'s turn.`);
+  setTimeout(() => { b.remove(); locked = false; render(); }, 1500);
+}
+$('roll').onclick = () => act('roll'); $('hold').onclick = () => act('hold');
+addEventListener('keydown', e => { if (e.target.tagName === 'INPUT') return; if (e.key === 'r' || e.key === 'R') act('roll'); if (e.key === 'h' || e.key === 'H') act('hold'); });
+
+function render(animate) {
+  state.players.forEach((p, i) => {
+    const el = $('p' + i), active = p.userId === state.currentPlayerId, won = p.userId === state.winnerId;
+    el.className = 'panel' + (active ? ' active' : '') + (won ? ' winner' : '');
+    el.setAttribute('aria-label', `${p.username}${active ? ', current turn' : ''}${won ? ', winner' : ''}`);
+    el.innerHTML = `<div class="name">${p.username}<span class="dot"></span></div><div class="turn-label">${won ? '' : 'Your turn'}</div>
+      <div class="global" title="Global Score">${p.globalScore}</div><div class="wins">🏆 ${p.winCount} win${p.winCount === 1 ? '' : 's'}</div>
+      <div class="current"><small>Current</small><b>${p.roundScore}</b></div>`;
+  });
+  $('target').textContent = `First to ${state.winningScore}`;
+  const lr = state.lastRoll;
+  $('dice').innerHTML = (lr ? lr.dice : ['–', '–']).map(d => `<div class="die${animate ? ' roll' : ''}">${d}</div>`).join('');
+  $('note').textContent = lr ? (lr.bust ? '6 & 6 → round lost' : `+${lr.dice[0] + lr.dice[1]} to round`) : '';
+  const over = state.status !== 'IN_PROGRESS';
+  $('roll').disabled = $('hold').disabled = over || locked;
+  $('why').textContent = locked ? 'Locked — bust!' : over ? 'Game over — start a New Game' : `Acting as ${cur().username} (seat ${state.players.indexOf(cur()) + 1})`;
+  $('roll').title = $('hold').title = $('why').textContent;
+  const w = state.players.find(p => p.userId === state.winnerId);
+  $('winbar').classList.toggle('hidden', !w);
+  if (w) $('winbar').textContent = `🏆 ${w.username} wins with ${w.globalScore}! Press New Game to play again.`;
+}
+</script>
+</body>
+</html>

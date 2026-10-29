@@ -34,7 +34,7 @@ _TBD (filled by /developer S0)_
 - Full stories + acceptance criteria: [docs/requirements.md](docs/requirements.md).
 - "New game at any time" abandons the current Game: no winner, no Win Count change.
 - Player 1 starts.
-- Both users are simulated on one page, each with their own login/token (split screen).
+- Both users are simulated on one page. **Login** is just a username; then a default Game vs `player2` (logged in on the same page with its own JWT) to 100 is created. The opponent and target are changed through **New game**. Design: [docs/design.md](docs/design.md).
 
 ## Trade-offs
 

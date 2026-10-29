@@ -112,3 +112,35 @@ Every interaction with Claude Code: `datetime : skill — prompt / user input / 
 **Decision:** D1 (a), D2 (a), D3 (a). Defaults: @nestjs/config with JWT_SECRET, global ValidationPipe, CORS for Vite, GET game restricted to its Players, slices S0–S6.
 **Artifacts:** docs/architecture.md, packages/contracts/{package.json,src/auth.ts,game.ts,error.ts,index.ts}, docs/adr/0002-domain-errors-mapped-by-global-filter.md, README.md (Architecture, Trade-offs).
 **Next step suggested:** `/designer build 2 clickable HTML prototypes for the game screen per docs/requirements.md and docs/architecture.md`
+
+## 2026-10-29 : designer — prototypes & layout choice
+
+**User input:**
+> I like B - but no need for two login buttons - and instead of Seat should be Player, only Player 1 required - Player 2 optional with default value
+> [screenshot] please improve layout and UI/UX to be modern user friendly expirience
+> a - I tike the UI - but I dont think this is login screen, its more like start the game screen
+
+**Options offered:** D1 layout (a A + B progress bar / b A as is / c B as is) · D2 Player 2 default (a empty → `player2` / b prefilled / c `guest`) · D3 lock in (a confirm / b tweak)
+**Decision:** Variant B (dice table), one form: Player 1 required, Player 2 optional (falls back to `player2`), with the Winning Score chosen there too. Restyled as a modern dark felt theme (avatars, progress bars, pip dice, bust overlay with countdown, win overlay, New-game confirm sheet). The form is the **Start screen** (not "login"): it calls login twice and then creates the Game. Hold is still allowed at Round Score 0 (AC5.4).
+**Artifacts:** prototypes/variant-a.html, prototypes/variant-b.html, docs/design.md (new), docs/requirements.md (AC1.5), README.md (assumption).
+**Next step suggested:** `/developer S0 scaffold the monorepo per docs/architecture.md`
+
+## 2026-10-29 : designer — login-first correction
+
+**User input:**
+> I think this concept is off from the plan - first screen must be login screen then default game should be created with game UI
+
+**Decision:** The first screen is **Login** (Player 1 required, Player 2 optional → `player2`, one button). Winning Score was removed from it. After login a default Game (100, Player 1 starts) is created automatically and the Game screen is shown. The target is changed only through the New game sheet.
+**Artifacts:** prototypes/variant-b.html, docs/design.md (Login screen, LoginContainer/LoginForm), docs/requirements.md (AC1.5, AC1.6), README.md.
+**Next step suggested:** `/developer S0 scaffold the monorepo per docs/architecture.md`
+
+## 2026-10-29 : designer — username-only login (D4)
+
+**User input:**
+> login is for user name - just user name input and login , not related to players at this point
+> agree
+
+**Options offered:** D4 opponent after login (a auto default `player2` + opponent/target in New game sheet / b empty card waiting for second login / c like a but edit via "vs player2 ✎" link)
+**Decision:** D4 (a). Login = username + Log in only. Then the app logs in `player2` (or `player1` if you are player2) with its own JWT and creates a default Game to 100, with you starting. The New game sheet has Opponent + First to fields.
+**Artifacts:** prototypes/variant-b.html, docs/design.md, docs/requirements.md (AC1.5, AC1.6), README.md.
+**Next step suggested:** `/developer S0 scaffold the monorepo per docs/architecture.md`

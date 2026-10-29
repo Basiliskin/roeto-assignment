@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Variant B — Dice Table</title>
+<!-- THROWAWAY PROTOTYPE: mock logic only. Never imported by apps/web. -->
+<style>
+  :root {
+    --bg-1: #0e3323; --bg-2: #061a11;
+    --surface: rgba(255,255,255,.06); --surface-2: rgba(255,255,255,.10); --border: rgba(255,255,255,.12);
+    --text: #f3f6f4; --muted: #a9bcb2;
+    --gold: #f7c948; --gold-ink: #2b2100;
+    --p1: #f7c948; --p2: #5ec8f2;
+    --danger: #ff5d5d; --success: #4ade80;
+    --radius-lg: 20px; --radius: 12px; --radius-sm: 8px;
+    --space: 16px;
+    --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --shadow: 0 20px 50px rgba(0,0,0,.45);
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; font-family: var(--font); color: var(--text);
+    background: radial-gradient(1200px 700px at 50% -10%, var(--bg-1), var(--bg-2));
+    display: grid; place-items: center; min-height: 100vh; padding: 24px 16px;
+  }
+  .hidden { display: none !important; }
+  .wrap { width: min(560px, 100%); display: grid; gap: var(--space); }
+  button { font: inherit; cursor: pointer; border: 0; color: inherit; background: none; }
+  button:disabled { cursor: not-allowed; opacity: .4; }
+  :focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; border-radius: var(--radius-sm); }
+  kbd { font: 600 .7rem var(--font); padding: 1px 6px; border-radius: 5px; border: 1px solid currentColor; opacity: .6; margin-left: 6px; }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 20px; border-radius: var(--radius); font-weight: 700; transition: transform .1s, filter .15s, background .15s; }
+  .btn:active:not(:disabled) { transform: translateY(1px) scale(.99); }
+  .btn-primary { background: var(--gold); color: var(--gold-ink); box-shadow: 0 6px 20px rgba(247,201,72,.25); }
+  .btn-primary:hover:not(:disabled) { filter: brightness(1.05); }
+  .btn-ghost { background: var(--surface); border: 1px solid var(--border); }
+  .btn-ghost:hover:not(:disabled) { background: var(--surface-2); }
+  .btn-sm { padding: 8px 14px; font-size: .9rem; }
+
+  .glass { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); backdrop-filter: blur(10px); box-shadow: var(--shadow); }
+
+  /* ---------- Brand ---------- */
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.1rem; letter-spacing: .3px; }
+  .brand-mark { width: 34px; height: 34px; border-radius: 10px; background: var(--gold); color: var(--gold-ink); display: grid; place-items: center; font-size: 1.1rem; }
+
+  /* ---------- Login screen ---------- */
+  .hero { text-align: center; margin: 0 0 20px; }
+  #login { width: min(420px, 100%); justify-self: center; }
+  .hero .brand { justify-content: center; font-size: 1.6rem; }
+  .hero .brand-mark { width: 48px; height: 48px; font-size: 1.6rem; border-radius: 14px; }
+  .hero p { color: var(--muted); margin: 10px 0 0; }
+  .login { padding: 28px; display: grid; gap: 20px; }
+  .field { display: grid; gap: 8px; }
+  .field-label { display: flex; justify-content: space-between; align-items: baseline; font-weight: 600; font-size: .95rem; }
+  .field-label small { color: var(--muted); font-weight: 500; }
+  .input-wrap { position: relative; }
+  .input-wrap .avatar { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; font-size: .85rem; }
+  input[type=text], input[type=number] {
+    width: 100%; font: inherit; color: var(--text); background: rgba(0,0,0,.25);
+    border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 14px 14px 50px; transition: border-color .15s, box-shadow .15s;
+  }
+  input::placeholder { color: #6f8a7d; }
+  input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 4px rgba(247,201,72,.18); }
+  input[aria-invalid=true] { border-color: var(--danger); }
+  .hint { color: var(--muted); font-size: .8rem; }
+  .err { color: var(--danger); font-size: .85rem; display: flex; gap: 6px; align-items: center; }
+  .err:empty { display: none; }
+
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { padding: 8px 14px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); font-weight: 600; font-size: .9rem; }
+  .chip[aria-pressed=true] { background: var(--gold); color: var(--gold-ink); border-color: var(--gold); }
+  .chip-input { width: 96px !important; padding: 8px 12px !important; border-radius: 999px !important; font-size: .9rem; }
+
+  .avatar { border-radius: 50%; display: grid; place-items: center; font-weight: 800; color: #0b1f16; flex: none; }
+  .avatar.p1 { background: var(--p1); } .avatar.p2 { background: var(--p2); }
+
+  /* ---------- Top bar ---------- */
+  .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .pill { padding: 6px 12px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); font-size: .85rem; color: var(--muted); }
+  .pill b { color: var(--text); }
+
+  /* ---------- Player cards ---------- */
+  .player { padding: 16px; display: grid; gap: 12px; border: 2px solid transparent; transition: border-color .25s, opacity .25s, transform .25s; }
+  .player.idle { opacity: .6; transform: scale(.98); }
+  .player.active.p1 { border-color: var(--p1); box-shadow: 0 0 0 6px rgba(247,201,72,.12), var(--shadow); }
+  .player.active.p2 { border-color: var(--p2); box-shadow: 0 0 0 6px rgba(94,200,242,.12), var(--shadow); }
+  .player-head { display: flex; align-items: center; gap: 12px; }
+  .player-head .avatar { width: 44px; height: 44px; font-size: 1.1rem; }
+  .player-name { font-weight: 700; font-size: 1.05rem; }
+  .player-sub { color: var(--muted); font-size: .8rem; }
+  .player-score { margin-left: auto; text-align: right; }
+  .player-score .g { font-size: 2rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+  .player-score .r { font-size: .8rem; color: var(--muted); }
+  .player-score .r b { color: var(--gold); }
+  .badge { display: inline-block; font-size: .7rem; font-weight: 800; letter-spacing: .6px; padding: 3px 8px; border-radius: 999px; margin-left: 8px; vertical-align: middle; }
+  .badge.turn { background: var(--gold); color: var(--gold-ink); }
+  .p2 .badge.turn { background: var(--p2); color: #062433; }
+  .progress { height: 10px; border-radius: 999px; background: rgba(0,0,0,.3); overflow: hidden; display: flex; }
+  .progress span { height: 100%; transition: width .4s cubic-bezier(.2,.8,.2,1); }
+  .progress .g { background: var(--success); }
+  .progress .r { background: repeating-linear-gradient(45deg, var(--gold) 0 6px, #e0b232 6px 12px); }
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .waiting { color: var(--muted); font-size: .85rem; text-align: center; padding: 6px; }
+
+  /* ---------- Table ---------- */
+  .table { position: relative; min-height: 220px; padding: 24px; display: grid; place-items: center; text-align: center;
+    background: radial-gradient(ellipse at center, #1f6b45 0%, #134a30 70%); border-radius: 28px; border: 1px solid rgba(255,255,255,.15);
+    box-shadow: inset 0 0 60px rgba(0,0,0,.45), var(--shadow); overflow: hidden; }
+  .dice { display: flex; gap: 18px; justify-content: center; }
+  .die { width: 76px; height: 76px; background: linear-gradient(145deg, #fff, #e7e7e7); border-radius: 16px; padding: 12px;
+    display: grid; grid-template: repeat(3, 1fr) / repeat(3, 1fr); box-shadow: 0 8px 0 #b9b9b9, 0 14px 24px rgba(0,0,0,.35); }
+  .die i { width: 12px; height: 12px; border-radius: 50%; background: #1a1a1a; place-self: center; visibility: hidden; }
+  .die i.on { visibility: visible; }
+  .die.six i.on { background: #c62828; }
+  .die.empty { opacity: .35; }
+  .die.roll { animation: toss .55s cubic-bezier(.3,1.5,.5,1); }
+  .die.roll:nth-child(2) { animation-delay: .06s; }
+  @keyframes toss { from { transform: translateY(-70px) rotate(220deg) scale(.7); } }
+  .roll-result { margin-top: 18px; min-height: 28px; }
+  .delta { display: inline-block; font-weight: 800; font-size: 1.1rem; padding: 4px 12px; border-radius: 999px; background: rgba(0,0,0,.25); animation: rise .4s; }
+  @keyframes rise { from { transform: translateY(8px); opacity: 0; } }
+  .table-hint { color: var(--muted); font-size: .9rem; }
+
+  .bust { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; gap: 6px;
+    background: radial-gradient(circle, rgba(220,38,38,.95), rgba(127,29,29,.97)); animation: flash .35s; }
+  .bust strong { font-size: 2.2rem; letter-spacing: 1px; }
+  .bust .bar { width: 160px; height: 4px; background: rgba(255,255,255,.3); border-radius: 99px; overflow: hidden; }
+  .bust .bar span { display: block; height: 100%; background: #fff; animation: drain 1.5s linear forwards; }
+  @keyframes flash { from { opacity: 0; transform: scale(1.08); } }
+  @keyframes drain { from { width: 100%; } to { width: 0; } }
+
+  /* ---------- Win overlay ---------- */
+  .overlay { position: fixed; inset: 0; background: rgba(3,12,8,.7); backdrop-filter: blur(4px); display: grid; place-items: center; padding: 16px; z-index: 10; }
+  .win { padding: 32px; text-align: center; width: min(400px, 100%); display: grid; gap: 14px; justify-items: center; background: #123524; animation: pop .35s cubic-bezier(.3,1.5,.5,1); }
+  .win .trophy { font-size: 3.5rem; }
+  .win h2 { margin: 0; font-size: 1.6rem; }
+  .win p { margin: 0; color: var(--muted); }
+  @keyframes pop { from { transform: scale(.8); opacity: 0; } }
+
+  dialog { border: 0; padding: 0; background: transparent; color: var(--text); width: min(420px, calc(100% - 32px)); }
+  dialog::backdrop { background: rgba(3,12,8,.7); backdrop-filter: blur(4px); }
+  .sheet { padding: 24px; display: grid; gap: 18px; background: #123524; }
+  .sheet h3 { margin: 0; }
+  .sheet-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+  .dev { position: fixed; bottom: 10px; right: 10px; font-size: .75rem; color: var(--muted); background: rgba(0,0,0,.4); padding: 6px 10px; border-radius: 8px; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+  @media (max-width: 420px) {
+    .die { width: 64px; height: 64px; padding: 10px; }
+    .player-score .g { font-size: 1.6rem; }
+    .login { padding: 20px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<main class="wrap">
+
+  <!-- ================= LOGIN (username only) ================= -->
+  <section id="login" aria-labelledby="loginTitle">
+    <div class="hero">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">🎲</span><span id="loginTitle">Dice Table</span></div>
+      <p>Roll as long as you dare. Hold to bank. 6 &amp; 6 busts.</p>
+    </div>
+    <form id="loginForm" class="glass login" novalidate>
+      <div class="field">
+        <label class="field-label" for="p1">Username</label>
+        <div class="input-wrap"><span class="avatar p1" id="av1" aria-hidden="true">?</span>
+          <input type="text" id="p1" name="p1" placeholder="e.g. alice" autocomplete="username" aria-describedby="p1hint p1err"></div>
+        <div class="hint" id="p1hint">3–20 letters, digits or _. New names are created automatically.</div>
+        <div class="err" id="p1err" role="alert"></div>
+      </div>
+      <button class="btn btn-primary">Log in</button>
+    </form>
+  </section>
+
+  <!-- ================= GAME ================= -->
+  <section id="game" class="wrap hidden" aria-label="Game">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">🎲</span>Dice Table</div>
+      <span class="pill">First to <b id="target"></b></span>
+      <button class="btn btn-ghost btn-sm" id="newBtn">↻ New game</button>
+    </header>
+
+    <article class="glass player" id="p1card"></article>
+
+    <div class="table" id="table">
+      <div>
+        <div class="dice" id="dice" aria-label="Last roll"></div>
+        <div class="roll-result" id="note"></div>
+      </div>
+    </div>
+
+    <article class="glass player" id="p0card"></article>
+  </section>
+
+  <div id="live" class="sr" aria-live="assertive"></div>
+</main>
+
+<!-- New game sheet -->
+<dialog id="newDialog" aria-labelledby="newTitle">
+  <form method="dialog" class="glass sheet" id="newForm">
+    <h3 id="newTitle">Start a new game?</h3>
+    <p class="hint" style="margin:0" id="abandonNote">The current game will be abandoned — no one gets a win.</p>
+    <div class="field">
+      <label class="field-label" for="opp">Opponent</label>
+      <div class="input-wrap"><span class="avatar p2" id="avOpp" aria-hidden="true">P</span>
+        <input type="text" id="opp" placeholder="player2" autocomplete="off" aria-describedby="opperr"></div>
+      <div class="err" id="opperr" role="alert"></div>
+    </div>
+    <fieldset class="field" style="border:0;padding:0;margin:0">
+      <legend class="field-label" style="margin-bottom:8px">First to</legend>
+      <div class="chips" id="newChips"></div>
+      <div class="err" id="wsErrNew" role="alert"></div>
+    </fieldset>
+    <div class="sheet-actions">
+      <button class="btn btn-ghost btn-sm" value="cancel" formnovalidate>Cancel</button>
+      <button class="btn btn-primary btn-sm" value="ok" id="newOk">Start</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Win overlay -->
+<div class="overlay hidden" id="winOverlay" role="dialog" aria-modal="true" aria-labelledby="winTitle">
+  <div class="glass win">
+    <div class="trophy" aria-hidden="true">🏆</div>
+    <h2 id="winTitle"></h2>
+    <p id="winSub"></p>
+    <button class="btn btn-primary" id="againBtn">Play again</button>
+  </div>
+</div>
+
+<label class="dev"><input type="checkbox" id="force"> next roll = 6&amp;6 (demo)</label>
+
+<script>
+// ===== MOCK API (shape matches GameStateDto from packages/contracts) =====
+const seats = [null, null], winCounts = {};
+let state = null, locked = false;
+const rnd = () => 1 + Math.floor(Math.random() * 6);
+const cur = () => state.players.find(p => p.userId === state.currentPlayerId);
+const pass = () => { state.currentPlayerId = state.players.find(p => p.userId !== state.currentPlayerId).userId; };
+function guard(uid) {
+  if (state.status !== 'IN_PROGRESS') throw { statusCode: 409, message: 'Game is over' };
+  if (uid !== state.currentPlayerId) throw { statusCode: 403, message: 'Not your Turn' };
+}
+const api = {
+  login(u) {
+    if (!/^[a-zA-Z0-9_]{3,20}$/.test(u)) throw { statusCode: 400, message: '3–20 letters, digits or _' };
+    const id = u.toLowerCase(); winCounts[id] ??= 0;
+    return { accessToken: 'tok-' + id, user: { id, username: u, winCount: winCounts[id] } };
+  },
+  createGame(ws) {
+    if (!Number.isInteger(ws) || ws < 10 || ws > 1000) throw { statusCode: 400, message: 'Pick a target between 10 and 1000' };
+    if (state?.status === 'IN_PROGRESS') state.status = 'ABANDONED';
+    const p = s => ({ userId: s.user.id, username: s.user.username, globalScore: 0, roundScore: 0, winCount: winCounts[s.user.id] });
+    return state = { id: crypto.randomUUID(), status: 'IN_PROGRESS', winningScore: ws, players: [p(seats[0]), p(seats[1])], currentPlayerId: seats[0].user.id, winnerId: null, lastRoll: null };
+  },
+  roll(uid, forced) {
+    guard(uid);
+    const dice = forced ? [6, 6] : [rnd(), rnd()], bust = dice[0] === 6 && dice[1] === 6;
+    if (bust) { cur().roundScore = 0; pass(); } else cur().roundScore += dice[0] + dice[1];
+    state.lastRoll = { dice, bust }; return state;
+  },
+  hold(uid) {
+    guard(uid);
+    const me = cur(); me.globalScore += me.roundScore; me.roundScore = 0; state.lastRoll = null;
+    if (me.globalScore >= state.winningScore) { state.status = 'WON'; state.winnerId = me.userId; state.currentPlayerId = null; me.winCount = ++winCounts[me.userId]; }
+    else pass();
+    return state;
+  },
+};
+
+// ===== UI (renders state only) =====
+const $ = id => document.getElementById(id);
+const say = t => { $('live').textContent = ''; setTimeout(() => $('live').textContent = t, 30); };
+const initial = s => (s || '?').trim().charAt(0).toUpperCase() || '?';
+const PLAYER2_DEFAULT = 'player2';
+const PRESETS = [50, 100, 250];
+
+// Winning-score chip group (presets + custom)
+function chipGroup(root, initialValue = 100) {
+  let value = initialValue;
+  root.innerHTML = PRESETS.map(v => `<button type="button" class="chip" data-v="${v}">${v}</button>`).join('') +
+    `<input type="number" class="chip-input" min="10" max="1000" placeholder="Custom" aria-label="Custom target">`;
+  const custom = root.querySelector('input');
+  const sync = () => root.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', String(+c.dataset.v === value && !custom.value)));
+  root.querySelectorAll('.chip').forEach(c => c.onclick = () => { custom.value = ''; value = +c.dataset.v; sync(); });
+  custom.oninput = () => { value = Number(custom.value); sync(); };
+  sync();
+  return { get: () => value, set: v => { value = v; custom.value = PRESETS.includes(v) ? '' : v; sync(); } };
+}
+const newWs = chipGroup($('newChips'));
+
+// Login: username only
+$('p1').oninput = e => { $('av1').textContent = initial(e.target.value); clearErr('p1'); };
+$('opp').oninput = e => { $('avOpp').textContent = initial(e.target.value || defaultOpponent()); clearErr('opp'); };
+function setErr(field, msg) { $(field + 'err').textContent = '⚠ ' + msg; $(field).setAttribute('aria-invalid', 'true'); $(field).focus(); }
+function clearErr(field) { $(field + 'err').textContent = ''; $(field).removeAttribute('aria-invalid'); }
+const defaultOpponent = () => seats[0]?.user.id === PLAYER2_DEFAULT ? 'player1' : PLAYER2_DEFAULT;
+
+// Logs the opponent in on this page (own JWT) and creates a Game as the logged-in User.
+function startGame(opponent, winningScore) {
+  if (opponent.toLowerCase() === seats[0].user.id) throw { field: 'opp', message: "You can't play against yourself" };
+  let r2; try { r2 = api.login(opponent); } catch (x) { throw { field: 'opp', message: x.message }; }
+  seats[1] = r2;
+  api.createGame(winningScore);
+}
+
+$('loginForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const u = $('p1').value.trim();
+  if (!u) return setErr('p1', 'Enter a username');
+  try { seats[0] = api.login(u); } catch (x) { return setErr('p1', x.message); }
+  startGame(defaultOpponent(), 100); // default Game: vs player2, to 100, you start
+  $('login').classList.add('hidden'); $('game').classList.remove('hidden');
+  render(); say(`Logged in as ${seats[0].user.username}. Game on vs ${seats[1].user.username}, first to 100. You roll first.`);
+});
+
+// New game: choose opponent + target
+$('newBtn').onclick = () => {
+  newWs.set(state.winningScore); $('wsErrNew').textContent = ''; clearErr('opp');
+  $('opp').value = seats[1].user.username === defaultOpponent() ? '' : seats[1].user.username;
+  $('opp').placeholder = defaultOpponent(); $('avOpp').textContent = initial($('opp').value || defaultOpponent());
+  $('abandonNote').classList.toggle('hidden', state.status !== 'IN_PROGRESS');
+  $('newDialog').showModal();
+};
+$('newOk').onclick = e => {
+  e.preventDefault();
+  try { startGame($('opp').value.trim() || defaultOpponent(), newWs.get()); }
+  catch (x) { return x.field ? setErr(x.field, x.message) : ($('wsErrNew').textContent = '⚠ ' + x.message); }
+  $('newDialog').close(); $('winOverlay').classList.add('hidden'); render(); say(`New game vs ${seats[1].user.username}. First to ${state.winningScore}.`);
+};
+$('againBtn').onclick = () => { api.createGame(state.winningScore); $('winOverlay').classList.add('hidden'); render(); say('New game started.'); };
+
+// Actions
+function act(kind) {
+  if (locked || !state || state.status !== 'IN_PROGRESS') return;
+  const uid = state.currentPlayerId, who = cur().username;
+  if (kind === 'roll') {
+    api.roll(uid, $('force').checked); $('force').checked = false;
+    if (state.lastRoll.bust) return bust(who);
+    render(true); const [a, b] = state.lastRoll.dice; say(`${who} rolled ${a} and ${b}. Plus ${a + b}. Round total ${cur().roundScore}.`);
+  } else {
+    api.hold(uid); render();
+    say(state.status === 'WON' ? `${who} wins!` : `${who} banked. ${cur().username}'s turn.`);
+  }
+}
+function bust(who) {
+  locked = true; render(true);
+  const b = document.createElement('div'); b.className = 'bust';
+  b.innerHTML = `<strong>BUST!</strong><span>${who} rolled 6 &amp; 6 — round lost</span><div class="bar"><span></span></div>`;
+  $('table').appendChild(b); say(`Bust! ${who} rolled 6 and 6 and loses the round. ${cur().username}'s turn.`);
+  setTimeout(() => { b.remove(); locked = false; render(); }, 1500);
+}
+addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || $('newDialog').open || !state) return;
+  const k = e.key.toLowerCase(); if (k === 'r') act('roll'); if (k === 'h') act('hold');
+});
+
+// Rendering
+const PIPS = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
+const die = (n, anim) => `<div class="die${n ? '' : ' empty'}${n === 6 ? ' six' : ''}${anim ? ' roll' : ''}" role="img" aria-label="${n || 'not rolled'}">` +
+  Array.from({ length: 9 }, (_, i) => `<i class="${n && PIPS[n].includes(i) ? 'on' : ''}"></i>`).join('') + '</div>';
+
+function render(animate) {
+  state.players.forEach((p, i) => {
+    const el = $(`p${i}card`), active = p.userId === state.currentPlayerId, cls = i ? 'p2' : 'p1';
+    el.className = `glass player ${cls} ${active ? 'active' : state.status === 'IN_PROGRESS' ? 'idle' : ''}`;
+    el.setAttribute('aria-label', `${p.username}${active ? ', your turn' : ''}`);
+    const g = Math.min(100, p.globalScore / state.winningScore * 100), r = Math.min(100 - g, p.roundScore / state.winningScore * 100);
+    const toGo = Math.max(0, state.winningScore - p.globalScore);
+    el.innerHTML = `
+      <div class="player-head">
+        <span class="avatar ${cls}" aria-hidden="true">${initial(p.username)}</span>
+        <div><div class="player-name">${p.username}${active ? '<span class="badge turn">YOUR TURN</span>' : ''}</div>
+          <div class="player-sub">🏆 ${p.winCount} win${p.winCount === 1 ? '' : 's'} · ${toGo} to go</div></div>
+        <div class="player-score"><div class="g" aria-label="Global score">${p.globalScore}</div>
+          <div class="r">round <b>+${p.roundScore}</b></div></div>
+      </div>
+      <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="${state.winningScore}" aria-valuenow="${p.globalScore}" aria-label="Progress to ${state.winningScore}">
+        <span class="g" style="width:${g}%"></span><span class="r" style="width:${r}%"></span></div>
+      ${active
+        ? `<div class="actions">
+             <button class="btn btn-primary" data-a="roll" ${locked ? 'disabled' : ''} title="${locked ? 'Locked — bust!' : 'Roll the dice'}">🎲 Roll<kbd>R</kbd></button>
+             <button class="btn btn-ghost" data-a="hold" ${locked ? 'disabled' : ''} title="${locked ? 'Locked — bust!' : 'Bank your round score'}">✋ Hold<kbd>H</kbd></button>
+           </div>`
+        : state.status === 'IN_PROGRESS' ? `<div class="waiting">${locked ? 'Turn passing…' : `Waiting for ${cur().username}…`}</div>` : ''}`;
+    el.querySelectorAll('[data-a]').forEach(b => b.onclick = () => act(b.dataset.a));
+  });
+  $('target').textContent = state.winningScore;
+  const lr = state.lastRoll;
+  $('dice').innerHTML = die(lr?.dice[0], animate) + die(lr?.dice[1], animate);
+  $('note').innerHTML = lr && !lr.bust ? `<span class="delta">+${lr.dice[0] + lr.dice[1]}</span>`
+    : state.status === 'IN_PROGRESS' ? `<span class="table-hint">${cur().username}, roll the dice</span>` : '';
+
+  const w = state.players.find(p => p.userId === state.winnerId);
+  $('winOverlay').classList.toggle('hidden', !w);
+  if (w) {
+    $('winTitle').textContent = `${w.username} wins!`;
+    $('winSub').textContent = `Reached ${w.globalScore} of ${state.winningScore} · ${w.winCount} win${w.winCount === 1 ? '' : 's'} total`;
+    setTimeout(() => $('againBtn').focus(), 50);
+  }
+}
+</script>
+</body>
+</html>
