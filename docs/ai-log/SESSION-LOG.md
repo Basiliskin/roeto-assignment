@@ -168,3 +168,15 @@ Every interaction with Claude Code: `datetime : skill — prompt / user input / 
 **Artifacts:** apps/api/src/shared/domain-error.ts, users/domain/{username,user,user.repository}.ts (+specs), games/domain/{game,player,errors,dice-roller,game.repository}.ts (+game.spec), games/infrastructure/fake-dice-roller.ts.
 **Gates:** lint ✅ typecheck ✅ build ✅ test ✅ (30 passed).
 **Next step suggested:** `/developer S2 Auth: login, JWT strategy/guard, users module, /users/me`
+
+## 2026-10-29 : developer — S2 auth
+
+**User input:**
+> S2 Auth: login, JWT strategy/guard, users module, /users/me
+> agree to recomendations
+
+**Options offered:** D1 JWT (a passport-jwt strategy + guard / b custom guard / c global guard + @Public) · D2 caller (a @CurrentUser decorator / b @Req) · D3 filter timing (a keep in S3, DTO gives 400 / b pull forward)
+**Decision:** D1 (a), D2 (a), D3 (a). Defaults: ConfigModule with JWT_SECRET (dev fallback), 12h expiry, payload `{ sub }`, the strategy returns 401 for unknown users, and the shared `configureApp()` (ValidationPipe whitelist+transform) is used by both main.ts and e2e. `npm test` in api runs unit + e2e. Fix: Nest 12 helper packages (ESM-only) pinned back to Nest 11-compatible versions.
+**Artifacts:** apps/api/src/{configure-app,main,app.module}.ts, users/{users.module,application/users.service,infrastructure/in-memory-user.repository,presentation/users.controller,presentation/to-user-dto}.ts, auth/{auth.module,application/auth.service,infrastructure/jwt.strategy,jwt-auth.guard,jwt-secret,presentation/auth.controller,login.dto,current-user.decorator}.ts, test/auth.e2e-spec.ts, apps/api/.env.example, apps/api/package.json, README.md.
+**Gates:** lint ✅ typecheck ✅ build ✅ test ✅ (30 unit + 12 e2e).
+**Next step suggested:** `/developer S3 Games API + DomainExceptionFilter + e2e (seeded dice)`
