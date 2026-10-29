@@ -1,3 +1,4 @@
+import { BOT_USERNAME } from '@dice/contracts';
 import { FormEvent, useState } from 'react';
 import { Button } from './Button';
 import { Modal } from './Modal';
@@ -8,6 +9,7 @@ interface NewGameDialogProps {
   open: boolean;
   inProgress: boolean;
   defaultOpponent: string;
+  initialVsBot: boolean;
   initialWinningScore: number;
   pending: boolean;
   error: string | null;
@@ -26,6 +28,7 @@ export function NewGameDialog(props: NewGameDialogProps) {
 function NewGameForm({
   inProgress,
   defaultOpponent,
+  initialVsBot,
   initialWinningScore,
   pending,
   error,
@@ -33,11 +36,12 @@ function NewGameForm({
   onClose,
 }: NewGameDialogProps) {
   const [opponentUsername, setOpponent] = useState('');
+  const [vsBot, setVsBot] = useState(initialVsBot);
   const [winningScore, setWinningScore] = useState(initialWinningScore);
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
-    onStart({ opponentUsername, winningScore });
+    onStart({ opponentUsername: vsBot ? BOT_USERNAME : opponentUsername, winningScore });
   };
 
   return (
@@ -52,10 +56,15 @@ function NewGameForm({
           className={styles.input}
           value={opponentUsername}
           onChange={(e) => setOpponent(e.target.value)}
-          placeholder={defaultOpponent}
+          placeholder={vsBot ? 'Bot 🤖' : defaultOpponent}
           maxLength={20}
           autoComplete="off"
+          disabled={vsBot}
         />
+      </label>
+      <label className={styles.check}>
+        <input type="checkbox" checked={vsBot} onChange={(e) => setVsBot(e.target.checked)} />
+        Play vs Bot 🤖
       </label>
       <WinningScorePicker value={winningScore} onChange={setWinningScore} />
       {error && (

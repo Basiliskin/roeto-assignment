@@ -31,7 +31,7 @@ Tooling defaults: npm workspaces (`apps/*`, `packages/*`), one root ESLint flat 
 | 1. Track wins per player | ✅ In (Should) | Small domain addition (Win Count on `GameWon`); shows the model extends cleanly. |
 | 4. Lock actions + message on 6 & 6 | ✅ In (Should) | Cheap, high UX value; purely presentational on top of a `bust` flag from the API. |
 | 2. Persist data | ⏳ If time (Could) | Repository port already isolates storage; in-memory is enough to demo the rules. |
-| 3. AI opponent | ❌ Cut | Needs a strategy service + auto-play loop + a non-human "player" identity — a second feature, not a 2h addition. Would plug in as a `PlayerStrategy` on the server. |
+| 3. AI opponent | ✅ In (Should, S10) | A system User `bot` plays its whole Turn on the server via a `BotStrategy` (hold at 20 or when it would win); the web app replays the steps with thinking pauses. See [ADR 0003](docs/adr/0003-bot-turn-decided-on-server-replayed-on-client.md). |
 | 5. Sound / music | ❌ Cut | Pure polish; no signal about architecture or trade-offs. |
 
 ## Assumptions
@@ -43,7 +43,8 @@ Tooling defaults: npm workspaces (`apps/*`, `packages/*`), one root ESLint flat 
 - One active Game per User; either Player may start a New Game.
 - Full stories + acceptance criteria: [docs/requirements.md](docs/requirements.md).
 - "New game at any time" abandons the current Game: no winner, no Win Count change.
-- Player 1 starts.
+- Player 1 starts. Against the Bot, the human always starts.
+- **Bot:** pick "Play vs Bot 🤖" in New game. `bot` is a reserved username (login → 400); it may be in many Games at once and needs no seat on the page.
 - Both users are simulated on one page. **Login** is just a username; then a default Game vs `player2` (logged in on the same page with its own JWT) to 100 is created. The opponent and target are changed through **New game**. Design: [docs/design.md](docs/design.md).
 
 ## Trade-offs
@@ -59,6 +60,8 @@ Tooling defaults: npm workspaces (`apps/*`, `packages/*`), one root ESLint flat 
 - **Win Count incremented synchronously** in the hold use case instead of a domain-event bus — less wiring; an event is the obvious next step.
 - **One application service per module** instead of CQRS handlers — four use cases don't justify the ceremony.
 - **Backend-heavy tests** (domain unit + API e2e); frontend tests cover only hooks and helpers (Vitest), with no component or browser tests. The rules live in the API.
+- **Bot Turn decided on the server, replayed on the client** (ADR 0003): one request plays and saves the whole Turn; each `botSteps` entry carries the Bot's scores so the UI never computes them. In that response `lastRoll` stays the human's Roll, so a human Bust still triggers the lock.
+- **Opponent "bot" by reserved name** instead of a new request shape: no contract change for creating a Game.
 - **`@dice/contracts` is a shared kernel** (types and constants, no framework code): the domain may import the `WINNING_SCORE_*` bounds from it instead of duplicating them.
 
 ## With more time
@@ -66,7 +69,7 @@ Tooling defaults: npm workspaces (`apps/*`, `packages/*`), one root ESLint flat 
 - Passwords (bcrypt) and refresh tokens.
 - Persistent DB (SQLite/Postgres) via the existing repository port.
 - Frontend component tests and a Playwright happy path.
-- AI opponent: server-side `PlayerStrategy` (e.g. "hold at round score ≥ 20") driving a bot User's Turns.
+- Smarter Bot strategies (score-gap aware) or difficulty levels behind the existing `BotStrategy` port.
 - Sound effects on roll / bust / win.
 
 ## How I used AI

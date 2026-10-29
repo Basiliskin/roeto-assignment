@@ -128,3 +128,10 @@
     opacity: 0;
   }
 }
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}

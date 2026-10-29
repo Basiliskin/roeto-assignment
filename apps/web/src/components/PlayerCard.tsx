@@ -54,3 +54,12 @@ export function PlayerCard({ player, accent, active, winningScore, footer }: Pla
 export function Waiting({ name }: { name: string }) {
   return <p className={styles.waiting}>Waiting for {name}…</p>;
 }
+
+/** Footer of the Bot's card while it plays (AC10.7). */
+export function BotActivity({ thinking }: { thinking: boolean }) {
+  return (
+    <p className={styles.waiting} aria-hidden>
+      🤖 {thinking ? <span className={styles.thinking}>Bot is thinking</span> : 'Bot plays…'}
+    </p>
+  );
+}

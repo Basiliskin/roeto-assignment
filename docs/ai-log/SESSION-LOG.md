@@ -242,3 +242,16 @@ Every interaction with Claude Code: `datetime : skill — prompt / user input / 
 **Verification:** gates green. Fresh clone install + build ✅. API smoke/abuse script 10/10. `npm run dev` brings up both apps after the fix.
 **Artifacts:** docs/qa-report.md, package.json (+concurrently), apps/api/test/fake-dice-roller.ts (moved), apps/api/src/users/presentation/users.controller.ts, apps/web/src/{hooks/startGame,useGame,useStartSession,api/client}.ts, README.md.
 **Next step suggested:** commit everything and push to a new public GitHub repo
+
+## 2026-10-29 : developer — S7 Bot opponent
+
+**User input:**
+> D1 - a
+> D2 - a
+> D3 - a
+
+**Options offered:** D1 vs-Bot request (a reserved `opponentUsername: "bot"` / b typed `opponent` union / c `/games/vs-bot`) · D2 replay scores (a scores per BotStep / b full state per step / c UI sums dice) · D3 Bot Turn driver (a `playBotTurn` domain service / b method on `Game` / c inline in GamesService)
+**Decision:** D1 (a), D2 (a), D3 (a). Found during implementation: the response's `lastRoll` would be the Bot's, which hides a human Bust; it now stays the human's Roll when `botSteps` is non-empty (documented in contracts).
+**Verification:** typecheck + lint clean; API 37 unit + 39 e2e, web 25 tests green. Browser replay not yet checked by hand.
+**Artifacts:** contracts `BOT_USERNAME`, `BotStepDto`, `botSteps`; API `bot-strategy.ts`, `bot-player.ts` (+specs), GamesService, AuthService/Username (`RESERVED_USERNAME` → 400), e2e "vs Bot"; web `botReplay.ts` (+test), `useBotReplay.ts`, GameContainer, NewGameDialog, PlayerCard `BotActivity`, startGame/session (one seat vs Bot), announce; README.
+**Next step suggested:** `/qa` re-verify with S10

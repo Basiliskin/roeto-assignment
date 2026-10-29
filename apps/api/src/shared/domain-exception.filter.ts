@@ -7,6 +7,7 @@ import { DomainError } from './domain-error';
 /** Domain error code → HTTP status (ADR 0002). Unlisted codes are treated as server bugs. */
 const STATUS_BY_CODE: Record<string, HttpStatus> = {
   INVALID_USERNAME: HttpStatus.BAD_REQUEST,
+  RESERVED_USERNAME: HttpStatus.BAD_REQUEST,
   INVALID_WINNING_SCORE: HttpStatus.BAD_REQUEST,
   SELF_PLAY: HttpStatus.BAD_REQUEST,
   NOT_A_PLAYER: HttpStatus.FORBIDDEN,

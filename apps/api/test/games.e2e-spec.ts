@@ -53,6 +53,7 @@ describe('Games (e2e)', () => {
         currentPlayerId: alice.user.id,
         winnerId: null,
         lastRoll: null,
+        botSteps: [],
       });
     });
 
@@ -207,6 +208,69 @@ describe('Games (e2e)', () => {
 
       dice.push([1, 2]);
       expect((await act(alice, old.id, 'roll')).status).toBe(409);
+    });
+  });
+
+  describe('vs Bot', () => {
+    const botGame = async (winningScore?: number) =>
+      (await create(alice, { opponentUsername: 'Bot', winningScore })).body as GameStateDto;
+
+    it('starts against the system User bot with my Turn (AC10.1)', async () => {
+      const game = await botGame();
+      expect(game.status).toBe('IN_PROGRESS');
+      expect(game.players[1].username).toBe('bot');
+      expect(game.currentPlayerId).toBe(alice.user.id);
+      expect(game.botSteps).toEqual([]);
+    });
+
+    it('rejects logging in as bot in any case (AC10.2)', async () => {
+      const res = await http().post('/auth/login').send({ username: 'BoT' });
+      expect(res.status).toBe(400);
+    });
+
+    it('plays the Bot Turn inside my Hold and returns its steps (AC10.3, AC10.4)', async () => {
+      const game = await botGame();
+      dice.push([2, 3], [6, 5], [6, 4], [1, 2]);
+      await act(alice, game.id, 'roll');
+      const res = await act(alice, game.id, 'hold');
+
+      const state = res.body as GameStateDto;
+      expect(res.status).toBe(200);
+      expect(state.currentPlayerId).toBe(alice.user.id);
+      expect(state.players.map((p) => p.globalScore)).toEqual([5, 21]);
+      expect(state.botSteps).toEqual([
+        { kind: 'ROLL', dice: [6, 5], bust: false, roundScore: 11, globalScore: 0 },
+        { kind: 'ROLL', dice: [6, 4], bust: false, roundScore: 21, globalScore: 0 },
+        { kind: 'HOLD', won: false, roundScore: 0, globalScore: 21 },
+      ]);
+    });
+
+    it('plays the Bot Turn after my Bust, still reporting my Bust (AC10.3, AC4.1)', async () => {
+      const game = await botGame();
+      dice.push([6, 6], [3, 4], [6, 6]);
+      const state = (await act(alice, game.id, 'roll')).body as GameStateDto;
+      expect(state.lastRoll).toEqual({ dice: [6, 6], bust: true });
+      expect(state.botSteps).toEqual([
+        { kind: 'ROLL', dice: [3, 4], bust: false, roundScore: 7, globalScore: 0 },
+        { kind: 'ROLL', dice: [6, 6], bust: true, roundScore: 0, globalScore: 0 },
+      ]);
+      expect(state.currentPlayerId).toBe(alice.user.id);
+    });
+
+    it('a Bot Win ends the Game and bumps its Win Count (AC10.5)', async () => {
+      const game = await botGame(10);
+      dice.push([5, 6]);
+      const state = (await act(alice, game.id, 'hold')).body as GameStateDto;
+      expect(state.status).toBe('WON');
+      expect(state.winnerId).toBe(state.players[1].userId);
+      expect(state.players[1].winCount).toBe(1);
+    });
+
+    it('the Bot may be in many Games at once (AC10.6)', async () => {
+      const first = await botGame();
+      await create(bob, { opponentUsername: 'bot' });
+      const old = (await http().get(`/games/${first.id}`).set(auth(alice))).body as GameStateDto;
+      expect(old.status).toBe('IN_PROGRESS');
     });
   });
 });

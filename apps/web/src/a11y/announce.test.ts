@@ -1,6 +1,6 @@
 import type { GameStateDto, PlayerStateDto } from '@dice/contracts';
 import { describe, expect, it } from 'vitest';
-import { announce } from './announce';
+import { announce, announceBotTurn } from './announce';
 
 const player = (userId: string, globalScore = 0): PlayerStateDto => ({
   userId,
@@ -17,6 +17,7 @@ const state = (over: Partial<GameStateDto>): GameStateDto => ({
   currentPlayerId: 'alice',
   winnerId: null,
   lastRoll: null,
+  botSteps: [],
   ...over,
 });
 
@@ -41,5 +42,12 @@ describe('announce', () => {
   it('describes a win', () => {
     const s = state({ status: 'WON', winnerId: 'alice', currentPlayerId: null });
     expect(announce('hold', 'alice', s)).toBe('alice wins with 42!');
+  });
+
+  it('describes the end of a Bot Turn', () => {
+    const s = state({ players: [player('alice', 42), player('bot', 23)] });
+    expect(announceBotTurn(s, 'bot')).toBe('bot is at 23. alice to roll.');
+    const won = state({ status: 'WON', players: [player('alice'), player('bot', 100)] });
+    expect(announceBotTurn(won, 'bot')).toBe('bot wins with 100!');
   });
 });

@@ -5,9 +5,9 @@ export interface Seat {
   user: UserDto;
 }
 
-/** Both Users logged in on this page plus the Game they are playing. */
+/** The Users logged in on this page (one when playing the Bot) plus the Game they are playing. */
 export interface Session {
-  seats: [Seat, Seat];
+  seats: [Seat] | [Seat, Seat];
   gameId: string;
 }
 
