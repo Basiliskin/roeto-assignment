@@ -70,7 +70,6 @@ Tooling defaults: npm workspaces (`apps/*`, `packages/*`), one root ESLint flat 
 - Persistent DB (SQLite/Postgres) via the existing repository port.
 - Frontend component tests and a Playwright happy path.
 - Smarter Bot strategies (score-gap aware) or difficulty levels behind the existing `BotStrategy` port.
-- Sound effects on roll / bust / win.
 
 ## How I used AI
 
