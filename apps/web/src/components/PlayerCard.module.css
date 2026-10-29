@@ -1,0 +1,141 @@
+.card {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-width: 2px;
+  transition:
+    border-color 0.25s,
+    opacity 0.25s,
+    transform 0.25s;
+}
+
+.idle {
+  opacity: 0.6;
+  transform: scale(0.98);
+}
+
+.active.p1 {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 6px rgba(247, 201, 72, 0.12);
+}
+
+.active.p2 {
+  border-color: var(--p2);
+  box-shadow: 0 0 0 6px rgba(94, 200, 242, 0.12);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: #0b1f16;
+}
+
+.avatar.p1 {
+  background: var(--gold);
+}
+
+.avatar.p2 {
+  background: var(--p2);
+}
+
+.name {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.sub {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  vertical-align: middle;
+  background: var(--gold);
+  color: var(--gold-ink);
+}
+
+.p2 .badge {
+  background: var(--p2);
+  color: #062433;
+}
+
+.score {
+  margin-left: auto;
+  text-align: right;
+}
+
+.global {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.roundLabel {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.roundLabel b {
+  color: var(--gold);
+}
+
+.progress {
+  display: flex;
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.progress span {
+  height: 100%;
+  transition: width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.banked {
+  background: var(--success);
+}
+
+.round {
+  background: repeating-linear-gradient(45deg, var(--gold) 0 6px, #e0b232 6px 12px);
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.waiting {
+  margin: 0;
+  padding: 6px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+@media (max-width: 420px) {
+  .global {
+    font-size: 1.6rem;
+  }
+}

@@ -2,14 +2,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ApiError, apiClient } from './client';
 
 const respond = (status: number, body: unknown) =>
-  vi
-    .spyOn(globalThis, 'fetch')
-    .mockResolvedValue(
-      new Response(JSON.stringify(body), {
-        status,
-        headers: { 'Content-Type': 'application/json' },
-      }),
-    );
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { 'Content-Type': 'application/json' },
+    }),
+  );
 
 describe('apiClient', () => {
   afterEach(() => vi.restoreAllMocks());

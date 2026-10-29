@@ -1,0 +1,74 @@
+import { FormEvent, useState } from 'react';
+import { Button } from './Button';
+import { Modal } from './Modal';
+import { WinningScorePicker } from './WinningScorePicker';
+import styles from './Modal.module.css';
+
+interface NewGameDialogProps {
+  open: boolean;
+  inProgress: boolean;
+  defaultOpponent: string;
+  initialWinningScore: number;
+  pending: boolean;
+  error: string | null;
+  onStart: (input: { opponentUsername: string; winningScore: number }) => void;
+  onClose: () => void;
+}
+
+export function NewGameDialog(props: NewGameDialogProps) {
+  return (
+    <Modal open={props.open} labelledBy="new-game-title" onClose={props.onClose}>
+      <NewGameForm {...props} />
+    </Modal>
+  );
+}
+
+function NewGameForm({
+  inProgress,
+  defaultOpponent,
+  initialWinningScore,
+  pending,
+  error,
+  onStart,
+  onClose,
+}: NewGameDialogProps) {
+  const [opponentUsername, setOpponent] = useState('');
+  const [winningScore, setWinningScore] = useState(initialWinningScore);
+
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    onStart({ opponentUsername, winningScore });
+  };
+
+  return (
+    <form className={styles.sheet} onSubmit={submit}>
+      <h2 id="new-game-title">New game</h2>
+      {inProgress && (
+        <p className={styles.warning}>The current game will be abandoned — no one gets a win.</p>
+      )}
+      <label className={styles.field}>
+        <span className={styles.label}>Opponent</span>
+        <input
+          className={styles.input}
+          value={opponentUsername}
+          onChange={(e) => setOpponent(e.target.value)}
+          placeholder={defaultOpponent}
+          maxLength={20}
+          autoComplete="off"
+        />
+      </label>
+      <WinningScorePicker value={winningScore} onChange={setWinningScore} />
+      {error && (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      )}
+      <div className={styles.actions}>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button variant="primary" type="submit" disabled={pending} autoFocus>
+          {pending ? 'Starting…' : 'Start game'}
+        </Button>
+      </div>
+    </form>
+  );
+}

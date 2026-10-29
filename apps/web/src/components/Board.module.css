@@ -1,0 +1,57 @@
+.board {
+  display: grid;
+  gap: 16px;
+  width: min(560px, 100%);
+  margin: 0 auto;
+  padding: var(--space);
+}
+
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.mark {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--gold);
+  color: var(--gold-ink);
+}
+
+.pill {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.pill b {
+  color: var(--text);
+}
+
+.topActions {
+  display: flex;
+  gap: 8px;
+}
+
+.error {
+  margin: 0;
+  color: var(--danger);
+  text-align: center;
+}

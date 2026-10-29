@@ -205,3 +205,15 @@ Every interaction with Claude Code: `datetime : skill — prompt / user input / 
 **Artifacts:** apps/web/{vite.config.ts, src/App.tsx, main.tsx, api/client.ts(+test), seats/{SeatContext.tsx,session.ts,defaultOpponent.ts(+test)}, hooks/useStartSession.ts, components/LoginForm.{tsx,module.css}, containers/{LoginContainer,GameContainer}.tsx, styles/tokens.css}, packages/contracts/{package.json,tsconfig.json}, apps/api/{package.json,src/main.ts,.env.example}, README.md, docs/architecture.md.
 **Gates:** lint ✅ typecheck ✅ build ✅ test ✅ (30 unit + 33 e2e api, 6 web). Smoke test: login → player2 → create Game through the proxy ✅.
 **Next step suggested:** `/developer S5 Game board: New Game form, scores, dice, Roll/Hold, winner`
+
+## 2026-10-29 : developer — S5 game board
+
+**User input:**
+> S5 Game board: New Game form, scores, dice, Roll/Hold, winner
+> agree to recomendations
+
+**Options offered:** D1 scope (a S5 board+dialogs+keys+aria-live, S6 bust lock + win count / b all in S5) · D2 modals (a native <dialog> / b custom overlay) · D3 display math (a allow presentation-only derivations / b add toGo/% to DTO)
+**Decision:** D1 (a), D2 (a), D3 (a). Defaults: useGame holds the query + roll/hold/newGame mutations, and responses go into the cache via setQueryData. The Roll/Hold token comes from seatFor(currentPlayerId). startGame() is shared by login and New game (DRY). Play again reuses the same opponent and target. announce() builds the aria-live text.
+**Artifacts:** apps/web/src/{hooks/useGame,startGame,useTurnKeys,useStartSession}.ts, seats/seatFor.ts(+test), a11y/announce.ts(+test), components/{Button,Avatar,ProgressBar,TurnActions,PlayerCard,Die,DiceTable,TopBar,Modal,NewGameDialog,WinningScorePicker,WinOverlay,LiveRegion}.tsx + {ui,PlayerCard,DiceTable,Board,Modal}.module.css, containers/GameContainer.tsx.
+**Gates:** lint ✅ typecheck ✅ build ✅ test ✅ (30 unit + 33 e2e api, 13 web). Browser check: login → roll (R) → hold (H) → turn passes → New game self-play error → custom 10 → win overlay → Play again ✅, no console errors.
+**Next step suggested:** `/developer S6 Extras: Win Count display, Bust lock banner`

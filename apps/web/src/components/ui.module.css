@@ -1,0 +1,77 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 20px;
+  border: 0;
+  border-radius: var(--radius-control);
+  color: inherit;
+  background: none;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.1s,
+    filter 0.15s,
+    background 0.15s;
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px) scale(0.99);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.primary {
+  background: var(--gold);
+  color: var(--gold-ink);
+  box-shadow: 0 6px 20px rgba(247, 201, 72, 0.25);
+}
+
+.primary:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+.ghost {
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.ghost:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+
+.sm {
+  padding: 8px 14px;
+  font-size: 0.9rem;
+}
+
+.kbd {
+  margin-left: 6px;
+  padding: 1px 6px;
+  border: 1px solid currentColor;
+  border-radius: 5px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  opacity: 0.6;
+}
+
+.glass {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
