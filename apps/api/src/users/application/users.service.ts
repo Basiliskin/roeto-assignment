@@ -21,6 +21,13 @@ export class UsersService {
     return this.users.findById(id);
   }
 
+  /** For ids that must exist (e.g. Players of a stored Game). */
+  async getById(id: string): Promise<User> {
+    const user = await this.users.findById(id);
+    if (!user) throw new Error(`User ${id} not found`);
+    return user;
+  }
+
   async recordWin(userId: string): Promise<void> {
     const user = await this.users.findById(userId);
     if (!user) return;

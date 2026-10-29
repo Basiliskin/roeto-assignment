@@ -180,3 +180,15 @@ Every interaction with Claude Code: `datetime : skill — prompt / user input / 
 **Artifacts:** apps/api/src/{configure-app,main,app.module}.ts, users/{users.module,application/users.service,infrastructure/in-memory-user.repository,presentation/users.controller,presentation/to-user-dto}.ts, auth/{auth.module,application/auth.service,infrastructure/jwt.strategy,jwt-auth.guard,jwt-secret,presentation/auth.controller,login.dto,current-user.decorator}.ts, test/auth.e2e-spec.ts, apps/api/.env.example, apps/api/package.json, README.md.
 **Gates:** lint ✅ typecheck ✅ build ✅ test ✅ (30 unit + 12 e2e).
 **Next step suggested:** `/developer S3 Games API + DomainExceptionFilter + e2e (seeded dice)`
+
+## 2026-10-29 : developer — S3 games API
+
+**User input:**
+> S3 Games API + DomainExceptionFilter + e2e (seeded dice)
+> agree to recomendations
+
+**Options offered:** D1 error mapping (a code→status table / b instanceof chain / c httpStatus on error) · D2 seeded dice (a overrideProvider FakeDiceRoller / b DICE_SEED env) · D3 DTO mapping (a toGameStateDto in presentation / b GamesService.toDto)
+**Decision:** D1 (a), D2 (a), D3 (a). Defaults: the filter also normalises HttpExceptions into ApiErrorDto (fixes the S2 401 shape). Unknown errors → 500. Roll/Hold return 200, create 201. Creating a Game validates first, then abandons both Users' active Games. A non-Player GET → 403.
+**Artifacts:** apps/api/src/shared/domain-exception.filter.ts, configure-app.ts, app.module.ts, games/{games.module,application/games.service,infrastructure/in-memory-game.repository,random-dice-roller,presentation/games.controller,create-game.dto,to-game-state-dto}.ts, users/application/users.service.ts (getById), test/games.e2e-spec.ts, docs/architecture.md.
+**Gates:** lint ✅ typecheck ✅ build ✅ test ✅ (30 unit + 33 e2e).
+**Next step suggested:** `/developer S4 Web shell: ApiClient, SeatContext, two login seats`

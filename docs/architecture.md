@@ -43,9 +43,9 @@ apps/
       presentation/users.controller.ts   # GET /users/me
     games/
       domain/game.ts, player.ts, dice-roller.ts (port), game.repository.ts (port), errors.ts
-      application/games.service.ts       # create, roll, hold, get + toDto
+      application/games.service.ts       # create, roll, hold, get → GameView
       infrastructure/in-memory-game.repository.ts, random-dice-roller.ts
-      presentation/games.controller.ts, create-game.dto.ts
+      presentation/games.controller.ts, create-game.dto.ts, to-game-state-dto.ts
     test/*.e2e-spec.ts
   web/src/
     api/client.ts                # fetch wrapper, token passed per call
