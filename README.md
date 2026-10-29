@@ -32,7 +32,7 @@ Tooling defaults: npm workspaces (`apps/*`, `packages/*`), one root ESLint flat 
 | 4. Lock actions + message on 6 & 6 | ✅ In (Should) | Cheap, high UX value; purely presentational on top of a `bust` flag from the API. |
 | 2. Persist data | ⏳ If time (Could) | Repository port already isolates storage; in-memory is enough to demo the rules. |
 | 3. AI opponent | ✅ In (Should, S10) | A system User `bot` plays its whole Turn on the server via a `BotStrategy` (hold at 20 or when it would win); the web app replays the steps with thinking pauses. See [ADR 0003](docs/adr/0003-bot-turn-decided-on-server-replayed-on-client.md). |
-| 5. Sound / music | ❌ Cut | Pure polish; no signal about architecture or trade-offs. |
+| 5. Sound / music | ✅ In (Could, S11) | Sound effects only (Roll, Bust, Hold, Win), synthesised with WebAudio, so there are no audio files. They play from client-side events, including Bot replay steps, behind a `SoundPlayer` port; the API and domain are untouched. Mute toggle in the top bar, remembered per browser. Music stays cut. |
 
 ## Assumptions
 

@@ -132,3 +132,4 @@ Bot replay: when a response has `botSteps`, `useBotReplay` keeps the previous bo
 | S5 | Game board: New Game form, scores, dice, Roll/Hold, winner | Full game playable in browser |
 | S6 | Extras: Win Count display, Bust lock banner | AC8.2, AC9.x |
 | S7 | Bot opponent: `bot` User + login block, `BotStrategy`/`BotPlayer` + unit tests, `botSteps` in contracts and API, "vs Bot" in the New Game form, `useBotReplay` with thinking animation | e2e AC10.1–10.6 (seeded dice), UI AC10.7–10.9 |
+| S8 | Sound (story S11): `soundFor` maps Roll/Hold events, human or replayed Bot steps, to a sound. `SoundPlayer` port with a WebAudio player that synthesises sounds (no files). Win plays with the win overlay. Mute toggle in TopBar saved in localStorage | Unit: `soundFor`, mute preference; manual smoke with sound on and off |

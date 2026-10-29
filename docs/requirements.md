@@ -100,8 +100,8 @@ Error contract: **401** unauthenticated · **403** not your Turn / not a Player 
 
 - **Must:** S1–S7 with all rules enforced in the API, the error contract, domain unit tests, and API e2e tests.
 - **Should:** S8 Win Count, S9 Bust lock, S10 Bot opponent.
-- **Could:** saving data via local storage / SQLite through the repository port; a list of past Games.
-- **Won't:** Bot difficulty levels or adaptive strategies, sound/music, passwords/refresh tokens, live sync across browsers.
+- **Could:** S11 sound effects (Roll, Bust, Hold, Win) with a remembered mute toggle; saving data via local storage / SQLite through the repository port; a list of past Games.
+- **Won't:** Bot difficulty levels or adaptive strategies, background music, passwords/refresh tokens, live sync across browsers.
 
 ## Out of scope
 Passwords, multiple concurrent Games per User, spectators, leaderboards, live updates, mobile-specific layout.

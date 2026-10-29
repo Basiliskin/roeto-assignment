@@ -1,5 +1,5 @@
 import { BOT_USERNAME, type GameStateDto, type PlayerStateDto } from '@dice/contracts';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { announce, announceBotTurn } from '../a11y/announce';
 import { DiceTable } from '../components/DiceTable';
 import { LiveRegion } from '../components/LiveRegion';
@@ -12,7 +12,9 @@ import styles from '../components/Board.module.css';
 import { BUST_LOCK_MS, useBustLock } from '../hooks/useBustLock';
 import { useBotReplay } from '../hooks/useBotReplay';
 import { NewGameInput, useGame } from '../hooks/useGame';
+import { useSound } from '../hooks/useSound';
 import { useTurnKeys } from '../hooks/useTurnKeys';
+import { soundFor } from '../sound/sounds';
 import { defaultOpponentFor } from '../seats/defaultOpponent';
 import { Session } from '../seats/session';
 import { useSeats } from '../seats/SeatContext';
@@ -28,6 +30,8 @@ export function GameContainer({ session }: { session: Session }) {
   const [message, setMessage] = useState('');
   const [newGameOpen, setNewGameOpen] = useState(false);
   const { bust, lock, release } = useBustLock();
+  const sound = useSound();
+  const { play } = sound;
   const replay = useBotReplay((final) => {
     setMessage(announceBotTurn(final, BOT_USERNAME));
     refresh();
@@ -41,10 +45,12 @@ export function GameContainer({ session }: { session: Session }) {
   // Each Bot step animates like a human one: dice toss on a Roll, Bust banner on 6 & 6.
   const { frame, start: startReplay, cancel: cancelReplay } = replay;
   useEffect(() => {
-    if (!frame || frame.thinking || frame.step?.kind !== 'ROLL') return;
+    if (!frame || frame.thinking || !frame.step) return;
+    play(soundFor(frame.step));
+    if (frame.step.kind !== 'ROLL') return;
     setRollKey((k) => k + 1);
     if (frame.step.bust) lock(BOT_USERNAME);
-  }, [frame, lock]);
+  }, [frame, lock, play]);
 
   const act = useCallback(
     (action: 'roll' | 'hold') => {
@@ -55,12 +61,19 @@ export function GameContainer({ session }: { session: Session }) {
           const humanBust = action === 'roll' && !!state.lastRoll?.bust;
           if (action === 'roll') setRollKey((k) => k + 1);
           if (humanBust) lock(current.username);
+          play(
+            soundFor(
+              action === 'roll'
+                ? { kind: 'ROLL', bust: humanBust }
+                : { kind: 'HOLD', won: state.status !== 'IN_PROGRESS' },
+            ),
+          );
           setMessage(announce(action, current.username, state));
           if (game) startReplay(game, state, humanBust ? BUST_LOCK_MS : 0);
         },
       });
     },
-    [canAct, current, roll, hold, lock, game, startReplay],
+    [canAct, current, roll, hold, lock, play, game, startReplay],
   );
   const onRoll = useCallback(() => act('roll'), [act]);
   const onHold = useCallback(() => act('hold'), [act]);
@@ -76,6 +89,17 @@ export function GameContainer({ session }: { session: Session }) {
         setMessage('New game started.');
       },
     });
+
+  // The Win sound plays with the win overlay, after any Bot replay (AC10.9), only when the
+  // Win happens on screen: a Game loaded already won (e.g. on reload) stays silent.
+  const loaded = !!game;
+  const winnerId = game?.winnerId ?? null;
+  const shownWinner = useRef<string | null | undefined>(undefined);
+  useEffect(() => {
+    const before = shownWinner.current;
+    shownWinner.current = loaded ? winnerId : undefined;
+    if (winnerId && before === null) play('win');
+  }, [loaded, winnerId, play]);
 
   if (!game) {
     return (
@@ -125,6 +149,8 @@ export function GameContainer({ session }: { session: Session }) {
         winningScore={game.winningScore}
         onNewGame={() => setNewGameOpen(true)}
         onLogout={logout}
+        muted={sound.muted}
+        onToggleMuted={sound.toggleMuted}
       />
       {card(top, 'p2')}
       <DiceTable
