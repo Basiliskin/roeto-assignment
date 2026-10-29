@@ -102,3 +102,13 @@ Every interaction with Claude Code: `datetime : skill — prompt / user input / 
 **Decision:** D1 (a), D2 (a), D3 (a). Defaults: username 3–20 `[a-zA-Z0-9_]` case-insensitive; one active Game per User; either Player can start a New Game; Bust lock ~1.5s UI-only.
 **Artifacts:** docs/requirements.md (new), README.md (assumptions, scope table), GLOSSARY.md (Winning Score).
 **Next step suggested:** `/architect design modules, domain model, API contract and state DTO for docs/requirements.md`
+
+## 2026-10-29 : architect — decisions D1–D3
+
+**User input:**
+> agree to recomendatinos
+
+**Options offered:** D1 domain model (a Game aggregate + Win Count on User, synchronous / b Stats read-model via events / c separate Turn entity) · D2 layering & errors (a domain/application/infrastructure/presentation per module + global filter / b CQRS handlers / c flat Nest, HttpExceptions) · D3 API & frontend data (a full GameStateDto + TanStack Query + SeatContext / b useReducer + fetch / c delta responses)
+**Decision:** D1 (a), D2 (a), D3 (a). Defaults: @nestjs/config with JWT_SECRET, global ValidationPipe, CORS for Vite, GET game restricted to its Players, slices S0–S6.
+**Artifacts:** docs/architecture.md, packages/contracts/{package.json,src/auth.ts,game.ts,error.ts,index.ts}, docs/adr/0002-domain-errors-mapped-by-global-filter.md, README.md (Architecture, Trade-offs).
+**Next step suggested:** `/designer build 2 clickable HTML prototypes for the game screen per docs/requirements.md and docs/architecture.md`

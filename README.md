@@ -8,7 +8,11 @@ _TBD (filled by /developer S0)_
 
 ## Architecture
 
-_TBD (filled by /architect — 5 bullets max)_
+- npm-workspaces monorepo: `apps/api` (NestJS), `apps/web` (Vite + React), `packages/contracts` (shared DTO types).
+- All rules live in one pure `Game` aggregate (no Nest imports); the `DiceRoller` and repository ports are injected.
+- Domain errors are mapped to 400/403/409 by one global filter ([ADR 0002](docs/adr/0002-domain-errors-mapped-by-global-filter.md)).
+- Every game call returns the full `GameStateDto`; the web app only renders it (TanStack Query cache).
+- Two "seats" on one page, each with its own JWT. Details: [docs/architecture.md](docs/architecture.md).
 
 ## Scope — optional extras
 
@@ -36,6 +40,8 @@ _TBD (filled by /architect — 5 bullets max)_
 
 - **Username-only login + JWT guard** instead of passwords — see [ADR 0001](docs/adr/0001-username-only-authentication.md).
 - **In-memory storage** behind a repository port — swapping in SQLite is one adapter.
+- **Win Count incremented synchronously** in the hold use case instead of a domain-event bus — less wiring; an event is the obvious next step.
+- **One application service per module** instead of CQRS handlers — four use cases don't justify the ceremony.
 - **Backend-heavy tests** (domain unit + API e2e), no frontend tests — the rules live in the API.
 
 ## With more time
