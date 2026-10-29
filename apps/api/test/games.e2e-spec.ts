@@ -5,7 +5,7 @@ import type { ApiErrorDto, GameStateDto, LoginResponse } from '@dice/contracts';
 import { AppModule } from '../src/app.module';
 import { configureApp } from '../src/configure-app';
 import { DICE_ROLLER } from '../src/games/domain/dice-roller';
-import { FakeDiceRoller } from '../src/games/infrastructure/fake-dice-roller';
+import { FakeDiceRoller } from './fake-dice-roller';
 
 describe('Games (e2e)', () => {
   let app: INestApplication;

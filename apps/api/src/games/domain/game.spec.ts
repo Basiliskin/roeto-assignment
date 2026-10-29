@@ -7,7 +7,7 @@ import {
   SelfPlayError,
 } from './errors';
 import { Dice } from './dice-roller';
-import { FakeDiceRoller } from '../infrastructure/fake-dice-roller';
+import { FakeDiceRoller } from '../../../test/fake-dice-roller';
 
 const A = 'alice';
 const B = 'bob';

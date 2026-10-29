@@ -1,4 +1,4 @@
-import { Dice, DiceRoller } from '../domain/dice-roller';
+import { Dice, DiceRoller } from '../src/games/domain/dice-roller';
 
 /** Deterministic DiceRoller for tests: returns the queued rolls in order. */
 export class FakeDiceRoller implements DiceRoller {

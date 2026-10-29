@@ -229,3 +229,16 @@ Every interaction with Claude Code: `datetime : skill — prompt / user input / 
 **Artifacts:** apps/web/src/hooks/useBustLock.ts(+test), components/winsLabel.ts(+test), components/{PlayerCard,DiceTable,TopBar,WinningScorePicker}.tsx, {DiceTable,Modal}.module.css, containers/GameContainer.tsx, apps/web/package.json (dev: @testing-library/react, @testing-library/dom, jsdom).
 **Gates:** lint ✅ typecheck ✅ build ✅ test ✅ (30 unit + 33 e2e api, 20 web). Browser: win count increments and the cosmetics are fixed ✅. The bust overlay is verified by unit tests only (random dice in dev).
 **Next step suggested:** `/qa verify the full build against docs/requirements.md and audit SOLID/KISS/DRY/DDD`
+
+## 2026-10-29 : qa — full verification & audit
+
+**User input:**
+> verify the full build against docs/requirements.md and audit SOLID/KISS/DRY/DDD
+> agree to recomendations
+
+**Options offered:** D1 F1 dev script (a concurrently / b two-terminal README) · D2 F2–F6 (a fix all / b F2+F3 only / c none) · D3 F7/F8 (a accept + README line / b move constants)
+**Decision:** D1 (a), D2 (a), D3 (a).
+**Findings:** F1 root `npm run dev` never started web (High). F2 README test claim stale. F3 FakeDiceRoller shipped in dist. F4 dead 401 branch. F5 extra GET after New game. F6 unused apiClient.me. F7 domain imports contracts (accepted as shared kernel). F8 dice drawn before Turn check (ignored).
+**Verification:** gates green. Fresh clone install + build ✅. API smoke/abuse script 10/10. `npm run dev` brings up both apps after the fix.
+**Artifacts:** docs/qa-report.md, package.json (+concurrently), apps/api/test/fake-dice-roller.ts (moved), apps/api/src/users/presentation/users.controller.ts, apps/web/src/{hooks/startGame,useGame,useStartSession,api/client}.ts, README.md.
+**Next step suggested:** commit everything and push to a new public GitHub repo

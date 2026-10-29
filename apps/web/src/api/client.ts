@@ -4,7 +4,6 @@ import type {
   GameStateDto,
   LoginRequest,
   LoginResponse,
-  UserDto,
 } from '@dice/contracts';
 
 /** Thrown for any non-2xx response; `message` is the API's message, ready to show inline. */
@@ -51,7 +50,6 @@ async function request<T>(
 
 export const apiClient = {
   login: (body: LoginRequest) => request<LoginResponse>('/auth/login', { method: 'POST', body }),
-  me: (token: string) => request<UserDto>('/users/me', { token }),
   createGame: (token: string, body: CreateGameRequest) =>
     request<GameStateDto>('/games', { method: 'POST', token, body }),
   getGame: (token: string, id: string) => request<GameStateDto>(`/games/${id}`, { token }),

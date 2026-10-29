@@ -46,8 +46,8 @@ export function useGame(session: Session) {
   const newGame = useMutation({
     mutationFn: ({ opponentUsername, winningScore }: NewGameInput) =>
       startGame(me, opponentUsername.trim() || defaultOpponentFor(me.user.username), winningScore),
-    onSuccess: async (next) => {
-      cache(await apiClient.getGame(me.token, next.gameId));
+    onSuccess: ({ session: next, game }) => {
+      cache(game);
       setSession(next);
     },
   });

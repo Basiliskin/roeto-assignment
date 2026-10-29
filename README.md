@@ -9,7 +9,7 @@ Requires Node ≥ 20.
 ```bash
 npm install
 cp apps/api/.env.example apps/api/.env   # optional; JWT_SECRET falls back to a dev default
-npm run dev        # api on :3001 (PORT), web on :5173 (proxies /api → api)
+npm run dev        # api on :3001 + web on :5173 (proxies /api → api); open http://localhost:5173
 npm test           # api: Jest (unit + e2e), web: Vitest
 npm run lint && npm run typecheck && npm run build
 ```
@@ -58,7 +58,8 @@ Tooling defaults: npm workspaces (`apps/*`, `packages/*`), one root ESLint flat 
 - **In-memory storage** behind a repository port — swapping in SQLite is one adapter.
 - **Win Count incremented synchronously** in the hold use case instead of a domain-event bus — less wiring; an event is the obvious next step.
 - **One application service per module** instead of CQRS handlers — four use cases don't justify the ceremony.
-- **Backend-heavy tests** (domain unit + API e2e), no frontend tests — the rules live in the API.
+- **Backend-heavy tests** (domain unit + API e2e); frontend tests cover only hooks and helpers (Vitest), with no component or browser tests. The rules live in the API.
+- **`@dice/contracts` is a shared kernel** (types and constants, no framework code): the domain may import the `WINNING_SCORE_*` bounds from it instead of duplicating them.
 
 ## With more time
 

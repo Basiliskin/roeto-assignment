@@ -16,6 +16,6 @@ export function useStartSession() {
         defaultOpponentFor(me.user.username),
       );
     },
-    onSuccess: setSession,
+    onSuccess: ({ session }) => setSession(session),
   });
 }
