@@ -1,0 +1,227 @@
+<!doctype html>
+<!-- Template for index.html. Edit this file and the .md files, then run `npm run docs:diagrams`. -->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dice Game Diagrams</title>
+<style>
+  :root {
+    --bg: #f6f7f5; --panel: #ffffff; --text: #1d2420; --muted: #5d6a63; --line: #dfe4e0;
+    --accent: #1f6f4a; --accent-soft: #e3f1ea; --code: #eef1ee;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1613; --panel: #16201b; --text: #e6ece8; --muted: #9aa9a1; --line: #26332c;
+      --accent: #6fd3a0; --accent-soft: #1b3127; --code: #1c2822;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1613; --panel: #16201b; --text: #e6ece8; --muted: #9aa9a1; --line: #26332c;
+    --accent: #6fd3a0; --accent-soft: #1b3127; --code: #1c2822;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { position: sticky; top: 0; z-index: 5; background: var(--panel); border-bottom: 1px solid var(--line); }
+  .bar { max-width: 1100px; margin: 0 auto; padding: 10px 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .brand { font-weight: 700; margin-right: auto; }
+  nav { display: flex; gap: 6px; flex-wrap: wrap; }
+  nav button, .tool { border: 1px solid var(--line); background: var(--panel); color: var(--text);
+    border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+  nav button[aria-selected="true"] { background: var(--accent); color: var(--panel); border-color: var(--accent); }
+  nav small { opacity: .7; margin-right: 4px; }
+  main { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  .hint { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
+  article h1 { font-size: 24px; margin: 8px 0 12px; }
+  article h2 { font-size: 18px; margin: 28px 0 8px; }
+  article a { color: var(--accent); }
+  article code { background: var(--code); padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  article pre { background: var(--code); padding: 12px; border-radius: 8px; overflow-x: auto; }
+  article pre code { padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--accent-soft); }
+  .diagram { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px; margin: 12px 0; overflow-x: auto; }
+  .diagram svg { max-width: 100%; height: auto; }
+  .diagram .zoom { position: absolute; top: 8px; right: 8px; }
+  .diagram .linked { cursor: pointer; }
+  .diagram .linked:hover rect, .diagram .linked:hover polygon { stroke: var(--accent) !important; stroke-width: 3px !important; }
+  .err { color: #c0392b; white-space: pre-wrap; font-size: 13px; }
+  dialog { width: 96vw; height: 92vh; max-width: none; border: 1px solid var(--line); border-radius: 12px;
+    padding: 0; background: var(--panel); color: var(--text); }
+  dialog::backdrop { background: rgb(0 0 0 / .5); }
+  .dlg-bar { display: flex; gap: 8px; padding: 8px; border-bottom: 1px solid var(--line); align-items: center; }
+  .dlg-bar span { margin-right: auto; color: var(--muted); font-size: 13px; }
+  .stage { width: 100%; height: calc(100% - 50px); }
+  .stage svg { width: 100%; height: 100%; max-width: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand">🎲 Dice Game — HLD → LLD</div>
+    <nav id="tabs" role="tablist"></nav>
+    <button class="tool" id="theme" type="button" aria-label="Toggle theme">◐</button>
+  </div>
+</header>
+<main>
+  <p class="hint">Click a highlighted box to jump to its detailed diagram. Use ⤢ to open a diagram full screen with pan and zoom (scroll or pinch).</p>
+  <article id="page"></article>
+</main>
+<dialog id="dlg">
+  <div class="dlg-bar">
+    <span>Scroll to zoom, drag to pan</span>
+    <button class="tool" data-z="in" type="button">＋</button>
+    <button class="tool" data-z="out" type="button">－</button>
+    <button class="tool" data-z="reset" type="button">Reset</button>
+    <button class="tool" data-z="close" type="button">Close</button>
+  </div>
+  <div class="stage" id="stage"></div>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/svg-pan-zoom/3.6.1/svg-pan-zoom.min.js"></script>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs';
+
+  const PAGES = /*PAGES*/[];
+  const LABELS = { '01-hld.md': 'HLD', '02-components.md': 'Components', '03-flows.md': 'Flows', '04-domain-model.md': 'Domain' };
+  // A box whose text contains a key links to the page and heading that details it.
+  const LINKS = [
+    [/apps\/api|^API\b|NestJS/, '02-components.md', 'API: NestJS modules'],
+    [/apps\/web|Web app|SPA/, '02-components.md', 'Web: React structure'],
+    [/contracts/, '03-flows.md', null],
+    [/In-memory|InMemory|Repository/, '04-domain-model.md', 'Classes and ports'],
+    [/Bot/, '03-flows.md', 'Bot Turn'],
+    [/GamesService|GamesController/, '03-flows.md', 'Roll'],
+    [/AuthService|AuthController|JwtStrategy/, '03-flows.md', 'Login'],
+    [/^(Game|Player|User|Username)\b/, '04-domain-model.md', 'Classes and ports'],
+    [/DomainError|ExceptionFilter|ValidationPipe/, '03-flows.md', 'Error path'],
+    [/useBotReplay/, '03-flows.md', 'Bot Turn'],
+  ];
+
+  const root = document.documentElement;
+  const dark = () => root.dataset.theme
+    ? root.dataset.theme === 'dark'
+    : matchMedia('(prefers-color-scheme: dark)').matches;
+  try { const t = localStorage.getItem('diagrams.theme'); if (t) root.dataset.theme = t; } catch {}
+
+  const tabs = document.getElementById('tabs');
+  const page = document.getElementById('page');
+  let current = null;
+
+  PAGES.forEach(({ file }, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.role = 'tab';
+    b.innerHTML = `<small>${i + 1}</small>${LABELS[file] ?? file}`;
+    b.onclick = () => go(file);
+    b.dataset.file = file;
+    tabs.append(b);
+  });
+
+  const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+  async function render(file, heading) {
+    const p = PAGES.find((x) => x.file === file) ?? PAGES[0];
+    current = p.file;
+    for (const b of tabs.children) b.setAttribute('aria-selected', String(b.dataset.file === p.file));
+    mermaid.initialize({ startOnLoad: false, theme: dark() ? 'dark' : 'default', securityLevel: 'strict' });
+
+    page.innerHTML = marked.parse(p.markdown);
+    page.querySelectorAll('h1, h2').forEach((h) => (h.id = slug(h.textContent)));
+    page.querySelectorAll('a[href]').forEach((a) => {
+      const href = a.getAttribute('href');
+      if (PAGES.some((x) => x.file === href)) a.onclick = (e) => { e.preventDefault(); go(href); };
+    });
+
+    let n = 0;
+    for (const code of page.querySelectorAll('pre code.language-mermaid')) {
+      const box = document.createElement('div');
+      box.className = 'diagram';
+      const src = code.textContent;
+      try {
+        const { svg } = await mermaid.render(`m${Date.now()}${n++}`, src);
+        box.innerHTML = svg;
+        const zoom = document.createElement('button');
+        zoom.className = 'tool zoom';
+        zoom.type = 'button';
+        zoom.textContent = '⤢';
+        zoom.title = 'Full screen';
+        zoom.onclick = () => openZoom(box.querySelector('svg'));
+        box.append(zoom);
+        linkBoxes(box);
+      } catch (e) {
+        box.innerHTML = `<div class="err">Diagram error: ${String(e.message ?? e).replace(/</g, '&lt;')}</div>`;
+      }
+      code.parentElement.replaceWith(box);
+    }
+    const target = heading && [...page.querySelectorAll('h2')].find((h) => h.textContent.includes(heading));
+    (target ?? page).scrollIntoView({ block: 'start' });
+    if (!target) scrollTo(0, 0);
+  }
+
+  function linkBoxes(box) {
+    box.querySelectorAll('g.node, g.actor, g.classGroup, text.actor').forEach((node) => {
+      const text = node.textContent.trim();
+      const hit = LINKS.find(([re, file]) => re.test(text) && file !== current);
+      if (!hit) return;
+      const el = node.tagName === 'text' ? node.parentElement : node;
+      el.classList.add('linked');
+      el.setAttribute('role', 'link');
+      el.setAttribute('tabindex', '0');
+      el.setAttribute('aria-label', `${text} — open ${LABELS[hit[1]]}`);
+      const open = () => go(hit[1], hit[2]);
+      el.addEventListener('click', open);
+      el.addEventListener('keydown', (e) => e.key === 'Enter' && open());
+    });
+  }
+
+  let pz = null;
+  const dlg = document.getElementById('dlg');
+  const stage = document.getElementById('stage');
+  function openZoom(svg) {
+    stage.innerHTML = '';
+    const copy = svg.cloneNode(true);
+    copy.removeAttribute('style');
+    copy.setAttribute('width', '100%');
+    copy.setAttribute('height', '100%');
+    stage.append(copy);
+    dlg.showModal();
+    pz = svgPanZoom(copy, { controlIconsEnabled: false, fit: true, center: true, minZoom: 0.2, maxZoom: 20 });
+  }
+  dlg.addEventListener('close', () => { pz?.destroy(); pz = null; });
+  dlg.querySelectorAll('[data-z]').forEach((b) => (b.onclick = () => {
+    const z = b.dataset.z;
+    if (z === 'close') return dlg.close();
+    if (z === 'in') pz?.zoomIn();
+    if (z === 'out') pz?.zoomOut();
+    if (z === 'reset') { pz?.resetZoom(); pz?.center(); }
+  }));
+
+  function go(file, heading) {
+    const hash = `#${file.replace('.md', '')}${heading ? '/' + slug(heading) : ''}`;
+    if (location.hash !== hash) history.pushState(null, '', hash);
+    render(file, heading);
+  }
+  function fromHash() {
+    const [name, h] = location.hash.slice(1).split('/');
+    const file = name ? `${name}.md` : PAGES[0].file;
+    const heading = h && [...PAGES.find((p) => p.file === file)?.markdown.matchAll(/^## (.+)$/gm) ?? []]
+      .map((m) => m[1]).find((t) => slug(t) === h);
+    render(file, heading);
+  }
+  addEventListener('popstate', fromHash);
+
+  document.getElementById('theme').onclick = () => {
+    root.dataset.theme = dark() ? 'light' : 'dark';
+    try { localStorage.setItem('diagrams.theme', root.dataset.theme); } catch {}
+    render(current);
+  };
+
+  fromHash();
+</script>
+</body>
+</html>

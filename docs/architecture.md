@@ -2,6 +2,8 @@
 
 Implements [requirements.md](requirements.md). Terms per [GLOSSARY.md](../GLOSSARY.md). ADRs: [0001](adr/0001-username-only-authentication.md), [0002](adr/0002-domain-errors-mapped-by-global-filter.md).
 
+Diagrams from high level to low level: [diagrams/](diagrams/README.md) (interactive version: [diagrams/index.html](diagrams/index.html)).
+
 ## Context
 
 ```mermaid

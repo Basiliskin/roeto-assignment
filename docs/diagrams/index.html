@@ -1,0 +1,227 @@
+<!doctype html>
+<!-- Template for index.html. Edit this file and the .md files, then run `npm run docs:diagrams`. -->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dice Game Diagrams</title>
+<style>
+  :root {
+    --bg: #f6f7f5; --panel: #ffffff; --text: #1d2420; --muted: #5d6a63; --line: #dfe4e0;
+    --accent: #1f6f4a; --accent-soft: #e3f1ea; --code: #eef1ee;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1613; --panel: #16201b; --text: #e6ece8; --muted: #9aa9a1; --line: #26332c;
+      --accent: #6fd3a0; --accent-soft: #1b3127; --code: #1c2822;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1613; --panel: #16201b; --text: #e6ece8; --muted: #9aa9a1; --line: #26332c;
+    --accent: #6fd3a0; --accent-soft: #1b3127; --code: #1c2822;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { position: sticky; top: 0; z-index: 5; background: var(--panel); border-bottom: 1px solid var(--line); }
+  .bar { max-width: 1100px; margin: 0 auto; padding: 10px 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .brand { font-weight: 700; margin-right: auto; }
+  nav { display: flex; gap: 6px; flex-wrap: wrap; }
+  nav button, .tool { border: 1px solid var(--line); background: var(--panel); color: var(--text);
+    border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+  nav button[aria-selected="true"] { background: var(--accent); color: var(--panel); border-color: var(--accent); }
+  nav small { opacity: .7; margin-right: 4px; }
+  main { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  .hint { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
+  article h1 { font-size: 24px; margin: 8px 0 12px; }
+  article h2 { font-size: 18px; margin: 28px 0 8px; }
+  article a { color: var(--accent); }
+  article code { background: var(--code); padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  article pre { background: var(--code); padding: 12px; border-radius: 8px; overflow-x: auto; }
+  article pre code { padding: 0; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--accent-soft); }
+  .diagram { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px; margin: 12px 0; overflow-x: auto; }
+  .diagram svg { max-width: 100%; height: auto; }
+  .diagram .zoom { position: absolute; top: 8px; right: 8px; }
+  .diagram .linked { cursor: pointer; }
+  .diagram .linked:hover rect, .diagram .linked:hover polygon { stroke: var(--accent) !important; stroke-width: 3px !important; }
+  .err { color: #c0392b; white-space: pre-wrap; font-size: 13px; }
+  dialog { width: 96vw; height: 92vh; max-width: none; border: 1px solid var(--line); border-radius: 12px;
+    padding: 0; background: var(--panel); color: var(--text); }
+  dialog::backdrop { background: rgb(0 0 0 / .5); }
+  .dlg-bar { display: flex; gap: 8px; padding: 8px; border-bottom: 1px solid var(--line); align-items: center; }
+  .dlg-bar span { margin-right: auto; color: var(--muted); font-size: 13px; }
+  .stage { width: 100%; height: calc(100% - 50px); }
+  .stage svg { width: 100%; height: 100%; max-width: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand">🎲 Dice Game — HLD → LLD</div>
+    <nav id="tabs" role="tablist"></nav>
+    <button class="tool" id="theme" type="button" aria-label="Toggle theme">◐</button>
+  </div>
+</header>
+<main>
+  <p class="hint">Click a highlighted box to jump to its detailed diagram. Use ⤢ to open a diagram full screen with pan and zoom (scroll or pinch).</p>
+  <article id="page"></article>
+</main>
+<dialog id="dlg">
+  <div class="dlg-bar">
+    <span>Scroll to zoom, drag to pan</span>
+    <button class="tool" data-z="in" type="button">＋</button>
+    <button class="tool" data-z="out" type="button">－</button>
+    <button class="tool" data-z="reset" type="button">Reset</button>
+    <button class="tool" data-z="close" type="button">Close</button>
+  </div>
+  <div class="stage" id="stage"></div>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/svg-pan-zoom/3.6.1/svg-pan-zoom.min.js"></script>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs';
+
+  const PAGES = [{"file":"01-hld.md","markdown":"# 1. HLD — System context and containers\n\n## Context\n\nTwo people share one browser (hot-seat), or one person plays the Bot. Everything runs locally; there is no external service.\n\n```mermaid\nflowchart LR\n  P1([Human Player A]) --> WEB\n  P2([Human Player B\u003cbr/>same browser]) --> WEB\n  WEB[\"Web app\u003cbr/>Vite + React SPA\u003cbr/>:5173\"] -- \"HTTP JSON + Bearer JWT\u003cbr/>/api/* proxied\" --> API[\"API\u003cbr/>NestJS\u003cbr/>:3001\"]\n  API --> MEM[(\"In-memory\u003cbr/>repositories\")]\n  API -. \"plays its Turns\" .-> BOT([Bot\u003cbr/>system User 'bot'])\n```\n\n## Containers\n\n```mermaid\nflowchart TB\n  subgraph Browser\n    SPA[\"apps/web\u003cbr/>React 18 + TanStack Query\"]\n  end\n  subgraph Node[\"Node.js process\"]\n    API[\"apps/api\u003cbr/>NestJS REST\"]\n    REPO[(\"InMemoryGameRepository\u003cbr/>InMemoryUserRepository\")]\n    API --> REPO\n  end\n  CT[\"packages/contracts\u003cbr/>shared DTO types + constants\"]\n  SPA -- \"fetch /api/... (Vite dev proxy strips /api)\" --> API\n  CT -. \"imported by\" .-> SPA\n  CT -. \"imported by\" .-> API\n```\n\n| Container | Tech | Holds state? |\n|---|---|---|\n| `apps/web` | Vite, React, TanStack Query | Seats (tokens) in React context; server state in the Query cache. Lost on reload by design. |\n| `apps/api` | NestJS, Passport JWT, class-validator | All game state, in memory. Lost on API restart. |\n| `packages/contracts` | TypeScript types only | No. It is the single REST contract both sides compile against. |\n\n## Infrastructure today vs a production version\n\nToday: `npm run dev` starts both apps with `concurrently`. There is no database, container or cloud setup (by choice, see the scope table in the README).\n\n```mermaid\nflowchart LR\n  subgraph Today[\"Today (local)\"]\n    direction LR\n    V[Vite dev server :5173] -- proxy /api --> N[Nest :3001] --> M[(Memory)]\n  end\n  subgraph Prod[\"Production version (not built)\"]\n    direction LR\n    CDN[Static hosting / CDN\u003cbr/>built SPA] --> LB[Load balancer] --> A1[API instance]\n    LB --> A2[API instance]\n    A1 --> DB[(Postgres)]\n    A2 --> DB\n  end\n```\n\nOnly the infrastructure layer would change for production: a `PostgresGameRepository` / `PostgresUserRepository` implementing the same ports. Multiple API instances need shared storage, because state is in memory today. Next: [02-components.md](02-components.md).\n"},{"file":"02-components.md","markdown":"# 2. Components — modules and layers\n\n## API: NestJS modules\n\n```mermaid\nflowchart LR\n  APP[AppModule\u003cbr/>ConfigModule: JWT_SECRET] --> AUTH[AuthModule]\n  APP --> USERS[UsersModule]\n  APP --> GAMES[GamesModule]\n  AUTH --> USERS\n  GAMES --> USERS\n  GAMES -. \"uses JwtAuthGuard class\" .-> AUTH\n```\n\n`configureApp()` (shared by `main.ts` and the e2e tests) installs a global `ValidationPipe` and the global `DomainExceptionFilter`.\n\n## API: DDD layers inside each module\n\nDependency rule: `presentation → application → domain`. `infrastructure` implements domain ports. `domain/` imports nothing from Nest.\n\n```mermaid\nflowchart TB\n  subgraph presentation\n    AC[AuthController\u003cbr/>POST /auth/login]\n    UC[UsersController\u003cbr/>GET /users/me]\n    GC[GamesController\u003cbr/>POST /games · GET /games/:id\u003cbr/>POST /games/:id/roll · /hold]\n    DTO[toGameStateDto · toUserDto\u003cbr/>LoginDto · CreateGameDto]\n  end\n  subgraph application\n    AS[AuthService]\n    US[UsersService]\n    GS[GamesService]\n  end\n  subgraph domain\n    G[Game · Player]\n    U[User · Username]\n    BP[playBotTurn]\n    BS{{BotStrategy port}}\n    DR{{DiceRoller port}}\n    GR{{GameRepository port}}\n    UR{{UserRepository port}}\n    ERR[DomainError subclasses]\n  end\n  subgraph infrastructure\n    JWT[JwtStrategy · JwtAuthGuard]\n    RDR[RandomDiceRoller]\n    IGR[InMemoryGameRepository]\n    IUR[InMemoryUserRepository]\n    HAT[HoldAtTwentyStrategy]\n  end\n  AC --> AS\n  UC --> US\n  GC --> GS\n  AS --> US\n  GS --> US\n  GS --> G\n  GS --> BP\n  BP --> BS\n  BP --> DR\n  GS --> GR\n  US --> UR\n  US --> U\n  RDR -. implements .-> DR\n  IGR -. implements .-> GR\n  IUR -. implements .-> UR\n  HAT -. implements .-> BS\n  GC -. guarded by .-> JWT\n```\n\n`HoldAtTwentyStrategy` lives in `domain/bot-strategy.ts` (it is pure rules); it sits in the infrastructure box only as the bound implementation.\n\n## Web: React structure\n\nPresentational components render only `GameStateDto`; the UI makes no rule decisions.\n\n```mermaid\nflowchart TB\n  APP[App] --> SP[SeatProvider\u003cbr/>session: seats + gameId]\n  SP --> QP[QueryProvider\u003cbr/>401 → logout]\n  QP --> SCR{session?}\n  SCR -- no --> LC[LoginContainer] --> USS[useStartSession] --> SG[startGame]\n  SCR -- yes --> GCt[GameContainer]\n  GCt --> UG[useGame\u003cbr/>query + roll/hold/newGame mutations]\n  GCt --> UBR[useBotReplay\u003cbr/>botReplayTimeline]\n  GCt --> UBL[useBustLock\u003cbr/>1.5s lock]\n  GCt --> USo[useSound\u003cbr/>soundFor + SoundPlayer port]\n  GCt --> UTK[useTurnKeys\u003cbr/>R / H / Space]\n  UG --> CL[apiClient\u003cbr/>fetch /api]\n  SG --> CL\n  GCt --> UI[TopBar · PlayerCard · DiceTable\u003cbr/>TurnActions · NewGameDialog · WinOverlay · LiveRegion]\n  USo --> WA[WebAudio player\u003cbr/>or silent player]\n```\n\n| Concern | Where | Note |\n|---|---|---|\n| Which token acts | `seatFor(session, currentPlayerId)` in `useGame` | Each seat has its own JWT; the API decides whose Turn it is. |\n| Server state | TanStack Query cache `['game', id]` | Every mutation response replaces it (`setQueryData`); no refetch. |\n| Bot Turn | `useBotReplay` | Replays `botSteps` as frames, then `refresh()` ([ADR 0003](../adr/0003-bot-turn-decided-on-server-replayed-on-client.md)). |\n| Polish | `useBustLock`, `useSound`, `announce` | Presentational only; the API never knows about them. |\n\nNext: [03-flows.md](03-flows.md).\n"},{"file":"03-flows.md","markdown":"# 3. LLD — Request flows\n\nEvery mutation returns the full `GameStateDto`; the web app replaces its cache with it. Names match the code.\n\n## Login (and the default Game)\n\n```mermaid\nsequenceDiagram\n  actor U as Player\n  participant LC as LoginContainer\n  participant SS as useStartSession / startGame\n  participant API as AuthController → AuthService\n  participant US as UsersService\n  participant GS as GamesController → GamesService\n  U->>LC: username\n  LC->>SS: mutate(username)\n  SS->>API: POST /auth/login {username}\n  API->>API: Username.of() (bot is reserved → 400)\n  API->>US: findOrCreate(username)\n  US-->>API: User\n  API-->>SS: {accessToken, user}\n  Note over SS: default opponent: a human seat is logged in too (own JWT), or no seat for \"bot\"\n  SS->>GS: POST /games {opponentUsername} (Bearer me)\n  GS-->>SS: GameStateDto\n  SS->>LC: setSession({seats, gameId}) → GameContainer renders\n```\n\n## New Game (abandons active Games)\n\n```mermaid\nsequenceDiagram\n  participant W as useGame.newGame\n  participant C as GamesController\n  participant S as GamesService\n  participant G as Game\n  participant R as GameRepository\n  W->>C: POST /games {opponentUsername, winningScore}\n  C->>S: create(userId, opponent, winningScore)\n  S->>S: users.findOrCreate(opponent)\n  S->>G: Game.create() — SelfPlayError / InvalidWinningScoreError → 400\n  S->>R: findActiveByUserId(creator) → abandon() + save\n  alt opponent is not the Bot\n    S->>R: findActiveByUserId(opponent) → abandon() + save\n  end\n  S->>R: save(new Game)\n  S-->>C: GameView → toGameStateDto\n  C-->>W: 201 GameStateDto\n```\n\n## Roll (including Bust)\n\n```mermaid\nsequenceDiagram\n  actor P as Player\n  participant GC as GameContainer\n  participant UG as useGame.roll\n  participant S as GamesService\n  participant G as Game\n  participant D as DiceRoller\n  P->>GC: Roll button / R key\n  GC->>UG: mutate() with seatFor(currentPlayerId).token\n  UG->>S: POST /games/:id/roll\n  S->>D: roll() → [d1, d2]\n  S->>G: roll(userId, dice)\n  G->>G: assertCanAct (403 / 409)\n  alt 6 & 6\n    G->>G: player.loseRound(), passTurn()\n  else\n    G->>G: player.addToRound(d1 + d2)\n  end\n  S->>S: saveAfterHumanTurn (may play Bot Turn, see below)\n  S-->>UG: GameStateDto (lastRoll.bust)\n  UG-->>GC: setQueryData\n  GC->>GC: dice animation · bust → useBustLock 1.5s · sound · announce\n```\n\n## Hold → Win\n\n```mermaid\nsequenceDiagram\n  participant S as GamesService\n  participant G as Game\n  participant US as UsersService\n  participant R as GameRepository\n  S->>G: hold(userId)\n  G->>G: bankRound()\n  alt globalScore ≥ winningScore\n    G-->>S: {won: true} (status WON, winnerId set, no Turn pass)\n    S->>US: recordWin(userId) → Win Count + 1\n  else\n    G-->>S: {won: false}, passTurn()\n  end\n  S->>R: save(game)\n  Note right of S: web: WinOverlay + Win sound when winnerId appears\n```\n\n## Bot Turn — decided on the server, replayed on the client\n\nSee [ADR 0003](../adr/0003-bot-turn-decided-on-server-replayed-on-client.md).\n\n```mermaid\nsequenceDiagram\n  participant GC as GameContainer\n  participant S as GamesService\n  participant BP as playBotTurn\n  participant BS as BotStrategy (HoldAtTwenty)\n  participant G as Game\n  participant RP as useBotReplay\n  GC->>S: POST hold (or roll that busts) — Turn passes to bot\n  S->>BP: playBotTurn(game, botId, strategy, dice)\n  loop while currentPlayerId === bot\n    BP->>BS: decide({roundScore, globalScore, winningScore})\n    alt ROLL\n      BP->>G: roll(bot, dice) → step {ROLL, dice, bust}\n    else HOLD\n      BP->>G: hold(bot) → step {HOLD, won}\n    end\n  end\n  S->>S: bot won? recordWin(bot) · save once\n  S-->>GC: GameStateDto {botSteps[], lastRoll = human's roll}\n  GC->>RP: start(before, after, delay = bust lock?)\n  loop each step (botReplayTimeline)\n    RP-->>GC: thinking frame 600–1200 ms\n    RP-->>GC: step frame (dice, scores, sound, bust lock)\n  end\n  RP->>GC: done → refresh() → real state, WinOverlay if Bot won\n```\n\nControls stay locked during the replay. Space or a click skips to the end. No requests are made while it plays.\n\n## Error path\n\n```mermaid\nflowchart LR\n  REQ[HTTP request] --> VP{ValidationPipe}\n  VP -- bad DTO --> E400[400]\n  VP --> GU{JwtAuthGuard}\n  GU -- no/invalid token --> E401[401]\n  GU --> SVC[Service + domain]\n  SVC -- throws DomainError(code) --> F[DomainExceptionFilter\u003cbr/>STATUS_BY_CODE]\n  F --> MAP[\"INVALID_* / SELF_PLAY / RESERVED_USERNAME → 400\u003cbr/>NOT_A_PLAYER / NOT_YOUR_TURN → 403\u003cbr/>GAME_NOT_FOUND → 404\u003cbr/>GAME_NOT_IN_PROGRESS → 409\u003cbr/>unknown → 500\"]\n  MAP --> BODY[\"ApiErrorDto {statusCode, error, message}\"]\n  BODY --> CL[apiClient throws ApiError]\n  CL -- 401 --> LO[QueryProvider: logout → Login]\n  CL -- other --> INL[shown inline under the board]\n```\n\nSee [ADR 0002](../adr/0002-domain-errors-mapped-by-global-filter.md). Next: [04-domain-model.md](04-domain-model.md).\n"},{"file":"04-domain-model.md","markdown":"# 4. LLD — Domain model\n\n## Classes and ports\n\n```mermaid\nclassDiagram\n  class Game {\n    \u003c\u003caggregate root>>\n    +id\n    +players Player x2\n    +winningScore 10..1000\n    +status GameStatus\n    +currentPlayerId\n    +winnerId\n    +lastRoll LastRoll\n    +create(props)$ Game\n    +roll(userId, dice) bust\n    +hold(userId) won\n    +abandon()\n    +hasPlayer(userId)\n    -assertCanAct(userId)\n    -passTurn()\n  }\n  class Player {\n    \u003c\u003centity>>\n    +userId\n    +globalScore\n    +roundScore\n    +addToRound(points)\n    +loseRound()\n    +bankRound()\n  }\n  class User {\n    \u003c\u003caggregate root>>\n    +id\n    +username Username\n    +winCount\n    +recordWin()\n  }\n  class Username {\n    \u003c\u003cvalue object>>\n    +value lowercase\n    +isBot\n    +of(raw)$\n    +equals(other)\n  }\n  class GameRepository {\n    \u003c\u003cport>>\n    findById(id)\n    findActiveByUserId(userId)\n    save(game)\n  }\n  class UserRepository {\n    \u003c\u003cport>>\n    findById(id)\n    findByUsername(username)\n    save(user)\n  }\n  class DiceRoller {\n    \u003c\u003cport>>\n    roll() Dice\n  }\n  class BotStrategy {\n    \u003c\u003cport>>\n    decide(view) ROLL or HOLD\n  }\n  class HoldAtTwentyStrategy\n  class BotPlayer {\n    \u003c\u003cdomain service>>\n    +playBotTurn(game, botId, strategy, dice) BotStep[]\n  }\n  Game \"1\" *-- \"2\" Player\n  Player ..> User : userId\n  User *-- Username\n  BotStrategy \u003c|.. HoldAtTwentyStrategy\n  BotPlayer ..> Game\n  BotPlayer ..> BotStrategy\n  BotPlayer ..> DiceRoller\n  GameRepository ..> Game\n  UserRepository ..> User\n```\n\nGame methods return results and never do I/O. The application service saves the Game and records Wins.\n\n## Game lifecycle\n\n```mermaid\nstateDiagram-v2\n  [*] --> IN_PROGRESS: Game.create()\n  IN_PROGRESS --> WON: hold() and globalScore ≥ winningScore\n  IN_PROGRESS --> ABANDONED: abandon() (a Player starts a New Game)\n  WON --> [*]\n  ABANDONED --> [*]\n```\n\n## A Turn\n\n```mermaid\nstateDiagram-v2\n  [*] --> Rolling: Turn starts, roundScore = 0\n  Rolling --> Rolling: roll() not 6&6 / roundScore += d1 + d2\n  Rolling --> Passed: roll() 6&6 / Bust, roundScore = 0\n  Rolling --> Banked: hold() / globalScore += roundScore\n  Banked --> Won: globalScore ≥ winningScore\n  Banked --> Passed: otherwise\n  Passed --> [*]: other Player's Turn\n  Won --> [*]: Game WON\n```\n\n## Invariants (enforced in `Game`)\n\n| # | Rule | Error → HTTP |\n|---|---|---|\n| 1 | Exactly 2 Players, distinct Users | `SelfPlayError` → 400 |\n| 2 | Winning Score is an integer 10–1000 | `InvalidWinningScoreError` → 400 |\n| 3 | Only a Player, and only the current one, may act | `NotAPlayerError` / `NotYourTurnError` → 403 |\n| 4 | Roll and Hold need `IN_PROGRESS` | `GameNotInProgressError` → 409 |\n| 5 | 6 & 6 loses the Round Score and passes the Turn | — |\n| 6 | Hold banks; a Win ends the Game without passing the Turn | — |\n| 7 | Abandon ends an active Game with no winner | — |\n"}];
+  const LABELS = { '01-hld.md': 'HLD', '02-components.md': 'Components', '03-flows.md': 'Flows', '04-domain-model.md': 'Domain' };
+  // A box whose text contains a key links to the page and heading that details it.
+  const LINKS = [
+    [/apps\/api|^API\b|NestJS/, '02-components.md', 'API: NestJS modules'],
+    [/apps\/web|Web app|SPA/, '02-components.md', 'Web: React structure'],
+    [/contracts/, '03-flows.md', null],
+    [/In-memory|InMemory|Repository/, '04-domain-model.md', 'Classes and ports'],
+    [/Bot/, '03-flows.md', 'Bot Turn'],
+    [/GamesService|GamesController/, '03-flows.md', 'Roll'],
+    [/AuthService|AuthController|JwtStrategy/, '03-flows.md', 'Login'],
+    [/^(Game|Player|User|Username)\b/, '04-domain-model.md', 'Classes and ports'],
+    [/DomainError|ExceptionFilter|ValidationPipe/, '03-flows.md', 'Error path'],
+    [/useBotReplay/, '03-flows.md', 'Bot Turn'],
+  ];
+
+  const root = document.documentElement;
+  const dark = () => root.dataset.theme
+    ? root.dataset.theme === 'dark'
+    : matchMedia('(prefers-color-scheme: dark)').matches;
+  try { const t = localStorage.getItem('diagrams.theme'); if (t) root.dataset.theme = t; } catch {}
+
+  const tabs = document.getElementById('tabs');
+  const page = document.getElementById('page');
+  let current = null;
+
+  PAGES.forEach(({ file }, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.role = 'tab';
+    b.innerHTML = `<small>${i + 1}</small>${LABELS[file] ?? file}`;
+    b.onclick = () => go(file);
+    b.dataset.file = file;
+    tabs.append(b);
+  });
+
+  const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+  async function render(file, heading) {
+    const p = PAGES.find((x) => x.file === file) ?? PAGES[0];
+    current = p.file;
+    for (const b of tabs.children) b.setAttribute('aria-selected', String(b.dataset.file === p.file));
+    mermaid.initialize({ startOnLoad: false, theme: dark() ? 'dark' : 'default', securityLevel: 'strict' });
+
+    page.innerHTML = marked.parse(p.markdown);
+    page.querySelectorAll('h1, h2').forEach((h) => (h.id = slug(h.textContent)));
+    page.querySelectorAll('a[href]').forEach((a) => {
+      const href = a.getAttribute('href');
+      if (PAGES.some((x) => x.file === href)) a.onclick = (e) => { e.preventDefault(); go(href); };
+    });
+
+    let n = 0;
+    for (const code of page.querySelectorAll('pre code.language-mermaid')) {
+      const box = document.createElement('div');
+      box.className = 'diagram';
+      const src = code.textContent;
+      try {
+        const { svg } = await mermaid.render(`m${Date.now()}${n++}`, src);
+        box.innerHTML = svg;
+        const zoom = document.createElement('button');
+        zoom.className = 'tool zoom';
+        zoom.type = 'button';
+        zoom.textContent = '⤢';
+        zoom.title = 'Full screen';
+        zoom.onclick = () => openZoom(box.querySelector('svg'));
+        box.append(zoom);
+        linkBoxes(box);
+      } catch (e) {
+        box.innerHTML = `<div class="err">Diagram error: ${String(e.message ?? e).replace(/</g, '&lt;')}</div>`;
+      }
+      code.parentElement.replaceWith(box);
+    }
+    const target = heading && [...page.querySelectorAll('h2')].find((h) => h.textContent.includes(heading));
+    (target ?? page).scrollIntoView({ block: 'start' });
+    if (!target) scrollTo(0, 0);
+  }
+
+  function linkBoxes(box) {
+    box.querySelectorAll('g.node, g.actor, g.classGroup, text.actor').forEach((node) => {
+      const text = node.textContent.trim();
+      const hit = LINKS.find(([re, file]) => re.test(text) && file !== current);
+      if (!hit) return;
+      const el = node.tagName === 'text' ? node.parentElement : node;
+      el.classList.add('linked');
+      el.setAttribute('role', 'link');
+      el.setAttribute('tabindex', '0');
+      el.setAttribute('aria-label', `${text} — open ${LABELS[hit[1]]}`);
+      const open = () => go(hit[1], hit[2]);
+      el.addEventListener('click', open);
+      el.addEventListener('keydown', (e) => e.key === 'Enter' && open());
+    });
+  }
+
+  let pz = null;
+  const dlg = document.getElementById('dlg');
+  const stage = document.getElementById('stage');
+  function openZoom(svg) {
+    stage.innerHTML = '';
+    const copy = svg.cloneNode(true);
+    copy.removeAttribute('style');
+    copy.setAttribute('width', '100%');
+    copy.setAttribute('height', '100%');
+    stage.append(copy);
+    dlg.showModal();
+    pz = svgPanZoom(copy, { controlIconsEnabled: false, fit: true, center: true, minZoom: 0.2, maxZoom: 20 });
+  }
+  dlg.addEventListener('close', () => { pz?.destroy(); pz = null; });
+  dlg.querySelectorAll('[data-z]').forEach((b) => (b.onclick = () => {
+    const z = b.dataset.z;
+    if (z === 'close') return dlg.close();
+    if (z === 'in') pz?.zoomIn();
+    if (z === 'out') pz?.zoomOut();
+    if (z === 'reset') { pz?.resetZoom(); pz?.center(); }
+  }));
+
+  function go(file, heading) {
+    const hash = `#${file.replace('.md', '')}${heading ? '/' + slug(heading) : ''}`;
+    if (location.hash !== hash) history.pushState(null, '', hash);
+    render(file, heading);
+  }
+  function fromHash() {
+    const [name, h] = location.hash.slice(1).split('/');
+    const file = name ? `${name}.md` : PAGES[0].file;
+    const heading = h && [...PAGES.find((p) => p.file === file)?.markdown.matchAll(/^## (.+)$/gm) ?? []]
+      .map((m) => m[1]).find((t) => slug(t) === h);
+    render(file, heading);
+  }
+  addEventListener('popstate', fromHash);
+
+  document.getElementById('theme').onclick = () => {
+    root.dataset.theme = dark() ? 'light' : 'dark';
+    try { localStorage.setItem('diagrams.theme', root.dataset.theme); } catch {}
+    render(current);
+  };
+
+  fromHash();
+</script>
+</body>
+</html>
