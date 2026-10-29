@@ -20,7 +20,7 @@ flowchart LR
   end
   GR --> MEM[(in-memory)]
   UR --> MEM
-  CT[packages/contracts<br/>types only] -.-> C
+  CT[packages/contracts<br/>types + constants] -.-> C
   CT -.-> API
 ```
 
@@ -53,7 +53,7 @@ apps/
     hooks/useGame.ts             # TanStack Query: query + roll/hold/create mutations
     components/                  # presentational: Board, PlayerPanel, Dice, LoginForm, NewGameForm, BustBanner
     containers/                  # GameContainer, SeatContainer
-packages/contracts/src/          # auth.ts, game.ts, error.ts
+packages/contracts/src/          # auth.ts, game.ts, error.ts (built to dist/ for the API)
 ```
 
 Dependency rule: `presentation → application → domain`; `infrastructure` implements domain ports. `domain/` imports nothing from Nest.

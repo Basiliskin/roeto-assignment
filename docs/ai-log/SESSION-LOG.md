@@ -192,3 +192,16 @@ Every interaction with Claude Code: `datetime : skill — prompt / user input / 
 **Artifacts:** apps/api/src/shared/domain-exception.filter.ts, configure-app.ts, app.module.ts, games/{games.module,application/games.service,infrastructure/in-memory-game.repository,random-dice-roller,presentation/games.controller,create-game.dto,to-game-state-dto}.ts, users/application/users.service.ts (getById), test/games.e2e-spec.ts, docs/architecture.md.
 **Gates:** lint ✅ typecheck ✅ build ✅ test ✅ (30 unit + 33 e2e).
 **Next step suggested:** `/developer S4 Web shell: ApiClient, SeatContext, two login seats`
+
+## 2026-10-29 : developer — S4 web shell
+
+**User input:**
+> S4 Web shell: ApiClient, SeatContext, login per docs/design.md
+> agree to recomendations
+> D5 - a / D4 - agree
+
+**Options offered:** D1 seat persistence (a sessionStorage / b memory) · D2 styling (a tokens.css + CSS Modules / b global CSS / c Tailwind) · D3 API access (a Vite /api proxy / b VITE_API_URL + CORS) · D4 contracts runtime fix (a tsc → dist / b Nest webpack / c duplicate constants) · D5 port (a 3001 / b 3000)
+**Decision:** D1–D3 (a). The live smoke test found two problems: (1) port 3000 was held by another local project, and (2) the compiled API crashed because contracts were consumed as raw TS at runtime (S0 D2 was wrong: the API imports constants). D4 (a): contracts are built with tsc; `exports` gives node → dist and default/types → src, and the api pre-builds contracts before dev/build/test. D5 (a): API default port 3001, and the Vite proxy follows PORT.
+**Artifacts:** apps/web/{vite.config.ts, src/App.tsx, main.tsx, api/client.ts(+test), seats/{SeatContext.tsx,session.ts,defaultOpponent.ts(+test)}, hooks/useStartSession.ts, components/LoginForm.{tsx,module.css}, containers/{LoginContainer,GameContainer}.tsx, styles/tokens.css}, packages/contracts/{package.json,tsconfig.json}, apps/api/{package.json,src/main.ts,.env.example}, README.md, docs/architecture.md.
+**Gates:** lint ✅ typecheck ✅ build ✅ test ✅ (30 unit + 33 e2e api, 6 web). Smoke test: login → player2 → create Game through the proxy ✅.
+**Next step suggested:** `/developer S5 Game board: New Game form, scores, dice, Roll/Hold, winner`

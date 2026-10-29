@@ -9,12 +9,12 @@ Requires Node ≥ 20.
 ```bash
 npm install
 cp apps/api/.env.example apps/api/.env   # optional; JWT_SECRET falls back to a dev default
-npm run dev        # api on :3000, web on :5173
+npm run dev        # api on :3001 (PORT), web on :5173 (proxies /api → api)
 npm test           # api: Jest (unit + e2e), web: Vitest
 npm run lint && npm run typecheck && npm run build
 ```
 
-Tooling defaults: npm workspaces (`apps/*`, `packages/*`), one root ESLint flat config + Prettier, `@dice/contracts` is a types-only source package (no build step; `import type` only).
+Tooling defaults: npm workspaces (`apps/*`, `packages/*`), one root ESLint flat config + Prettier, `@dice/contracts` is compiled to `dist/` (CommonJS) for the Node API; Vite and TypeScript read its source via `exports` conditions.
 
 ## Architecture
 
@@ -47,6 +47,9 @@ Tooling defaults: npm workspaces (`apps/*`, `packages/*`), one root ESLint flat 
 - Both users are simulated on one page. **Login** is just a username; then a default Game vs `player2` (logged in on the same page with its own JWT) to 100 is created. The opponent and target are changed through **New game**. Design: [docs/design.md](docs/design.md).
 
 ## Trade-offs
+
+- **Contracts compiled, not types-only** (corrects S0): the API imports runtime constants (`WINNING_SCORE_*`), so Node needs JS. `exports` maps `node` → `dist`, `default`/`types` → `src`.
+- **Session in `sessionStorage`**: both seats + gameId survive a refresh; any 401 drops them → Login.
 
 - **Nest 11 pinned** (`@nestjs/config@4`, `jwt@11`, `passport@11`): the 12.x helpers are ESM-only and break Jest/CommonJS with Nest 11 core.
 - **JWT validated against the User store**: tokens from before an API restart (in-memory users wiped) get 401, and the client logs in again.

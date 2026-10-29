@@ -1,0 +1,62 @@
+:root {
+  --bg-1: #0e3323;
+  --bg-2: #061a11;
+  --surface: rgba(255, 255, 255, 0.06);
+  --surface-2: rgba(255, 255, 255, 0.1);
+  --border: rgba(255, 255, 255, 0.12);
+  --text: #f3f6f4;
+  --muted: #a9bcb2;
+  --gold: #f7c948;
+  --gold-ink: #2b2100;
+  --p2: #5ec8f2;
+  --success: #4ade80;
+  --danger: #ff5d5d;
+  --felt-1: #1f6b45;
+  --felt-2: #134a30;
+  --radius-sm: 8px;
+  --radius-control: 12px;
+  --radius-card: 20px;
+  --radius-table: 28px;
+  --space: 16px;
+  --font: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+  font-family: var(--font);
+  color: var(--text);
+  background: radial-gradient(ellipse at top, var(--bg-1), var(--bg-2)) fixed;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

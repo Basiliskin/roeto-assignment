@@ -98,3 +98,20 @@
 ### 2026-10-29T05:04:47.207Z : chat
 
 > commit this
+
+### 2026-10-29T05:05:04.440Z : developer
+
+> /developer S4 Web shell: ApiClient, SeatContext, login per docs/design.md
+
+### 2026-10-29T05:06:03.121Z : chat
+
+> agree to recomendations
+
+### 2026-10-29T05:08:46.406Z : chat
+
+> D5 - a
+> D4 - agree
+
+### 2026-10-29T05:10:07.153Z : chat
+
+> commit this

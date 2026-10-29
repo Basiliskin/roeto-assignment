@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "predev": "npm run build -w @dice/contracts",
+    "prebuild": "npm run build -w @dice/contracts",
+    "pretest": "npm run build -w @dice/contracts",
     "dev": "nest start --watch",
     "build": "nest build",
     "start": "node dist/main.js",
