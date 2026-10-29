@@ -156,3 +156,15 @@ Every interaction with Claude Code: `datetime : skill — prompt / user input / 
 **Artifacts:** package.json, tsconfig.base.json, eslint.config.mjs, .prettierrc, .gitignore, packages/contracts/{package.json,tsconfig.json}, apps/api/{package.json,tsconfig*.json,nest-cli.json,test/jest-e2e.json,src/main.ts,src/app.module.ts}, apps/web/{package.json,tsconfig.json,vite.config.ts,index.html,src/main.tsx,src/App.tsx}, README.md (How to run).
 **Gates:** lint ✅ typecheck ✅ build ✅ test ✅ (no tests yet).
 **Next step suggested:** `/developer S1 Domain Game/Player/User + errors + unit tests (fake DiceRoller)`
+
+## 2026-10-29 : developer — S1 domain
+
+**User input:**
+> S1 Domain Game/Player/User + errors + unit tests (fake DiceRoller)
+> agree to recomendations
+
+**Options offered:** D1 state machine (a status union + guards / b State pattern / c immutable Game) · D2 ids (a caller passes id / b Game generates / c IdGenerator port) · D3 username (a Username VO + DTO / b DTO only / c VO only)
+**Decision:** D1 (a), D2 (a), D3 (a). Defaults: DomainError base with a `code`. Guard order is NotAPlayer → GameNotInProgress → NotYourTurn. `currentPlayerId` is null once the Game is finished. `abandon()` on a Won Game is a no-op. FakeDiceRoller lives in games/infrastructure for reuse in S3 e2e.
+**Artifacts:** apps/api/src/shared/domain-error.ts, users/domain/{username,user,user.repository}.ts (+specs), games/domain/{game,player,errors,dice-roller,game.repository}.ts (+game.spec), games/infrastructure/fake-dice-roller.ts.
+**Gates:** lint ✅ typecheck ✅ build ✅ test ✅ (30 passed).
+**Next step suggested:** `/developer S2 Auth: login, JWT strategy/guard, users module, /users/me`
