@@ -23,8 +23,8 @@ export function TopBar({ winningScore, onNewGame, onLogout }: TopBarProps) {
         <Button size="sm" onClick={onNewGame}>
           ↻ New game
         </Button>
-        <Button size="sm" onClick={onLogout} title="Log out">
-          ⎋
+        <Button size="sm" onClick={onLogout}>
+          Log out
         </Button>
       </div>
     </header>

@@ -9,6 +9,7 @@ import { TopBar } from '../components/TopBar';
 import { TurnActions } from '../components/TurnActions';
 import { WinOverlay } from '../components/WinOverlay';
 import styles from '../components/Board.module.css';
+import { useBustLock } from '../hooks/useBustLock';
 import { NewGameInput, useGame } from '../hooks/useGame';
 import { useTurnKeys } from '../hooks/useTurnKeys';
 import { defaultOpponentFor } from '../seats/defaultOpponent';
@@ -22,9 +23,10 @@ export function GameContainer({ session }: { session: Session }) {
   const [rollKey, setRollKey] = useState(0);
   const [message, setMessage] = useState('');
   const [newGameOpen, setNewGameOpen] = useState(false);
+  const { bust, lock, release } = useBustLock();
 
   const busy = roll.isPending || hold.isPending || newGame.isPending;
-  const canAct = game?.status === 'IN_PROGRESS' && !busy;
+  const canAct = game?.status === 'IN_PROGRESS' && !busy && !bust;
   const current = game?.players.find((p) => p.userId === game.currentPlayerId);
 
   const act = useCallback(
@@ -34,11 +36,12 @@ export function GameContainer({ session }: { session: Session }) {
       mutation.mutate(undefined, {
         onSuccess: (state: GameStateDto) => {
           if (action === 'roll') setRollKey((k) => k + 1);
+          if (state.lastRoll?.bust && action === 'roll') lock(current.username);
           setMessage(announce(action, current.username, state));
         },
       });
     },
-    [canAct, current, roll, hold],
+    [canAct, current, roll, hold, lock],
   );
   const onRoll = useCallback(() => act('roll'), [act]);
   const onHold = useCallback(() => act('hold'), [act]);
@@ -49,6 +52,7 @@ export function GameContainer({ session }: { session: Session }) {
       onSuccess: () => {
         setNewGameOpen(false);
         setRollKey(0);
+        release();
         setMessage('New game started.');
       },
     });
@@ -80,7 +84,7 @@ export function GameContainer({ session }: { session: Session }) {
         footer={
           active ? (
             <TurnActions
-              disabledReason={busy ? 'Waiting for the server…' : null}
+              disabledReason={bust ? 'Locked — bust!' : busy ? 'Waiting for the server…' : null}
               onRoll={onRoll}
               onHold={onHold}
             />
@@ -104,6 +108,7 @@ export function GameContainer({ session }: { session: Session }) {
         lastRoll={game.lastRoll}
         rollKey={rollKey}
         hint={current ? `${current.username}, roll the dice` : ''}
+        bust={bust}
       />
       {card(bottom, 'p1')}
       {actionError && (

@@ -12,7 +12,7 @@ export function WinningScorePicker({ value, onChange }: WinningScorePickerProps)
   const custom = !PRESETS.includes(value);
   return (
     <fieldset className={styles.field}>
-      <legend className={styles.label}>First to</legend>
+      <legend className={`${styles.label} ${styles.legend}`}>First to</legend>
       <div className={styles.chips}>
         {PRESETS.map((preset) => (
           <button

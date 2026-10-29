@@ -44,6 +44,11 @@
   font-size: 0.95rem;
 }
 
+.legend {
+  margin-bottom: 8px;
+  padding: 0;
+}
+
 .input {
   width: 100%;
   padding: 12px 14px;

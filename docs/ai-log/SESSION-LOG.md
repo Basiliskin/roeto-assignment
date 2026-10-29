@@ -217,3 +217,15 @@ Every interaction with Claude Code: `datetime : skill — prompt / user input / 
 **Artifacts:** apps/web/src/{hooks/useGame,startGame,useTurnKeys,useStartSession}.ts, seats/seatFor.ts(+test), a11y/announce.ts(+test), components/{Button,Avatar,ProgressBar,TurnActions,PlayerCard,Die,DiceTable,TopBar,Modal,NewGameDialog,WinningScorePicker,WinOverlay,LiveRegion}.tsx + {ui,PlayerCard,DiceTable,Board,Modal}.module.css, containers/GameContainer.tsx.
 **Gates:** lint ✅ typecheck ✅ build ✅ test ✅ (30 unit + 33 e2e api, 13 web). Browser check: login → roll (R) → hold (H) → turn passes → New game self-play error → custom 10 → win overlay → Play again ✅, no console errors.
 **Next step suggested:** `/developer S6 Extras: Win Count display, Bust lock banner`
+
+## 2026-10-29 : developer — S6 extras
+
+**User input:**
+> S6 Extras: Win Count display, Bust lock banner
+> agree to recomendations
+
+**Options offered:** D1 lock trigger (a useBustLock from the roll onSuccess / b effect on lastRoll / c CSS animationend) · D2 tests (a testing-library + jsdom + fake timers / b pure formatter only) · D3 S5 cosmetics (a fold in / b leave for QA)
+**Decision:** D1 (a), D2 (a), D3 (a). The bust overlay drains over 1500ms and Roll/Hold/R/H are locked with the reason "Locked — bust!". New game releases the lock. Each card shows "🏆 n win(s) · N to go". The log-out button now reads "Log out", and the "First to" legend is aligned.
+**Artifacts:** apps/web/src/hooks/useBustLock.ts(+test), components/winsLabel.ts(+test), components/{PlayerCard,DiceTable,TopBar,WinningScorePicker}.tsx, {DiceTable,Modal}.module.css, containers/GameContainer.tsx, apps/web/package.json (dev: @testing-library/react, @testing-library/dom, jsdom).
+**Gates:** lint ✅ typecheck ✅ build ✅ test ✅ (30 unit + 33 e2e api, 20 web). Browser: win count increments and the cosmetics are fixed ✅. The bust overlay is verified by unit tests only (random dice in dev).
+**Next step suggested:** `/qa verify the full build against docs/requirements.md and audit SOLID/KISS/DRY/DDD`

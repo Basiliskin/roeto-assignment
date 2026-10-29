@@ -1,4 +1,5 @@
 import type { LastRollDto } from '@dice/contracts';
+import { BustLock } from '../hooks/useBustLock';
 import { Die } from './Die';
 import styles from './DiceTable.module.css';
 
@@ -7,9 +8,10 @@ interface DiceTableProps {
   /** Changes on every roll so the dice re-mount and replay the toss animation. */
   rollKey: number;
   hint: string;
+  bust: BustLock | null;
 }
 
-export function DiceTable({ lastRoll, rollKey, hint }: DiceTableProps) {
+export function DiceTable({ lastRoll, rollKey, hint, bust }: DiceTableProps) {
   const [a, b] = lastRoll?.dice ?? [null, null];
   const animate = rollKey > 0;
   return (
@@ -29,6 +31,15 @@ export function DiceTable({ lastRoll, rollKey, hint }: DiceTableProps) {
           )}
         </div>
       </div>
+      {bust && (
+        <div className={styles.bust} key={bust.key} role="alert">
+          <strong>BUST!</strong>
+          <span>{bust.name} rolled 6 &amp; 6 — round lost</span>
+          <div className={styles.countdown}>
+            <span />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

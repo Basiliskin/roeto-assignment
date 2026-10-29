@@ -2,6 +2,7 @@ import type { PlayerStateDto } from '@dice/contracts';
 import { ReactNode } from 'react';
 import { Accent, Avatar } from './Avatar';
 import { ProgressBar } from './ProgressBar';
+import { winsLabel } from './winsLabel';
 import ui from './ui.module.css';
 import styles from './PlayerCard.module.css';
 
@@ -28,7 +29,9 @@ export function PlayerCard({ player, accent, active, winningScore, footer }: Pla
             {player.username}
             {active && <span className={styles.badge}>YOUR TURN</span>}
           </div>
-          <div className={styles.sub}>{toGo} to go</div>
+          <div className={styles.sub}>
+            🏆 {winsLabel(player.winCount)} · {toGo} to go
+          </div>
         </div>
         <div className={styles.score}>
           <div className={styles.global}>{player.globalScore}</div>
