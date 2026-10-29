@@ -92,3 +92,13 @@ Every interaction with Claude Code: `datetime : skill — prompt / user input / 
 >  - but may demo should used for reference and inspiration
 
 **Decision:** Q19 deferred to /product, Q20 deferred to /designer. Demo saved to docs/reference/demo.png and referenced (inspiration only; PDF wins on conflicts) in product + designer skills.
+
+## 2026-10-29 : product — decisions D1–D3
+
+**User input:**
+> agree to recomendations
+
+**Options offered:** D1 Winning Score placement (a form on New Game / b always-visible input / c editable until first roll) · D2 bounds (a 10–1000, opponent ≠ self, auto-create / b any positive, self allowed / c opponent must exist) · D3 MoSCoW (a Must S1–S7, Should S8–S9, Could persistence / b extras in Must / c tighter)
+**Decision:** D1 (a), D2 (a), D3 (a). Defaults: username 3–20 `[a-zA-Z0-9_]` case-insensitive; one active Game per User; either Player can start a New Game; Bust lock ~1.5s UI-only.
+**Artifacts:** docs/requirements.md (new), README.md (assumptions, scope table), GLOSSARY.md (Winning Score).
+**Next step suggested:** `/architect design modules, domain model, API contract and state DTO for docs/requirements.md`

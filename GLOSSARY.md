@@ -18,7 +18,7 @@
 
 **Global Score** — A Player's banked points in a Game.
 
-**Winning Score** — The Global Score target fixed when a Game is created (default 100).
+**Winning Score** — The Global Score target, set when a Game is created (integer 10–1000, default 100) and immutable afterwards.
 
 **Win** — A Player's Global Score reaches the Winning Score upon Hold.
 
