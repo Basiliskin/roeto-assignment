@@ -144,3 +144,15 @@ Every interaction with Claude Code: `datetime : skill — prompt / user input / 
 **Decision:** D4 (a). Login = username + Log in only. Then the app logs in `player2` (or `player1` if you are player2) with its own JWT and creates a default Game to 100, with you starting. The New game sheet has Opponent + First to fields.
 **Artifacts:** prototypes/variant-b.html, docs/design.md, docs/requirements.md (AC1.5, AC1.6), README.md.
 **Next step suggested:** `/developer S0 scaffold the monorepo per docs/architecture.md`
+
+## 2026-10-29 : developer — S0 scaffold
+
+**User input:**
+> S0 scaffold the monorepo per docs/architecture.md
+> agree to recomendations
+
+**Options offered:** D1 test runner (a Jest api + Vitest web / b Vitest everywhere / c Jest everywhere) · D2 contracts consumption (a types-only source / b tsc build to dist / c project references) · D3 lint (a single root ESLint flat + Prettier / b per-app / c none)
+**Decision:** D1 (a), D2 (a), D3 (a). Apps were hand-scaffolded (minimal), with no generators.
+**Artifacts:** package.json, tsconfig.base.json, eslint.config.mjs, .prettierrc, .gitignore, packages/contracts/{package.json,tsconfig.json}, apps/api/{package.json,tsconfig*.json,nest-cli.json,test/jest-e2e.json,src/main.ts,src/app.module.ts}, apps/web/{package.json,tsconfig.json,vite.config.ts,index.html,src/main.tsx,src/App.tsx}, README.md (How to run).
+**Gates:** lint ✅ typecheck ✅ build ✅ test ✅ (no tests yet).
+**Next step suggested:** `/developer S1 Domain Game/Player/User + errors + unit tests (fake DiceRoller)`

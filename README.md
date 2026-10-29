@@ -4,7 +4,16 @@ Two-player dice game: all rules live in a NestJS API, a React app only renders s
 
 ## How to run
 
-_TBD (filled by /developer S0)_
+Requires Node ≥ 20.
+
+```bash
+npm install
+npm run dev        # api on :3000, web on :5173
+npm test           # api: Jest (unit + e2e), web: Vitest
+npm run lint && npm run typecheck && npm run build
+```
+
+Tooling defaults: npm workspaces (`apps/*`, `packages/*`), one root ESLint flat config + Prettier, `@dice/contracts` is a types-only source package (no build step; `import type` only).
 
 ## Architecture
 
