@@ -23,12 +23,15 @@ import { useSeats } from '../seats/SeatContext';
  */
 export function GameContainer({ session }: { session: Session }) {
   const { logout } = useSeats();
-  const { game: serverGame, error, roll, hold, newGame } = useGame(session);
+  const { game: serverGame, error, roll, hold, newGame, refresh } = useGame(session);
   const [rollKey, setRollKey] = useState(0);
   const [message, setMessage] = useState('');
   const [newGameOpen, setNewGameOpen] = useState(false);
   const { bust, lock, release } = useBustLock();
-  const replay = useBotReplay((final) => setMessage(announceBotTurn(final, BOT_USERNAME)));
+  const replay = useBotReplay((final) => {
+    setMessage(announceBotTurn(final, BOT_USERNAME));
+    refresh();
+  });
   const game = replay.frame?.state ?? serverGame;
 
   const busy = roll.isPending || hold.isPending || newGame.isPending;

@@ -255,3 +255,15 @@ Every interaction with Claude Code: `datetime : skill — prompt / user input / 
 **Verification:** typecheck + lint clean; API 37 unit + 39 e2e, web 25 tests green. Browser replay not yet checked by hand.
 **Artifacts:** contracts `BOT_USERNAME`, `BotStepDto`, `botSteps`; API `bot-strategy.ts`, `bot-player.ts` (+specs), GamesService, AuthService/Username (`RESERVED_USERNAME` → 400), e2e "vs Bot"; web `botReplay.ts` (+test), `useBotReplay.ts`, GameContainer, NewGameDialog, PlayerCard `BotActivity`, startGame/session (one seat vs Bot), announce; README.
 **Next step suggested:** `/qa` re-verify with S10
+
+## 2026-10-29 : qa — re-verify with S10 Bot opponent
+
+**User input:**
+> re-verify the full build including S10 Bot opponent
+> a a
+
+**Options offered:** D1 F9 stale dice after replay (a re-fetch on replay end / b API `lastRoll` always true + `humanBust` flag / c keep last replay frame) · D2 F10/F11 (a fix F10 only / b both / c README)
+**Decision:** D1 (a), D2 (a).
+**Verification:** gates green (37 + 39 + 25). Live API smoke 10/10. Browser: replay, skip, "BOT'S TURN", Bot's last roll shown after replay (matches GET).
+**Artifacts:** docs/qa-report.md, apps/web/src/{containers/GameContainer.tsx, hooks/useGame.ts, components/PlayerCard.tsx}
+**Next step suggested:** commit and publish

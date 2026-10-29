@@ -52,5 +52,8 @@ export function useGame(session: Session) {
     },
   });
 
-  return { game: query.data, error: query.error, roll, hold, newGame };
+  /** Re-reads the true state, e.g. the Bot's last Roll once its Turn has been replayed. */
+  const refresh = () => void query.refetch();
+
+  return { game: query.data, error: query.error, roll, hold, newGame, refresh };
 }

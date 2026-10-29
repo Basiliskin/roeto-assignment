@@ -1,4 +1,4 @@
-import type { PlayerStateDto } from '@dice/contracts';
+import { BOT_USERNAME, type PlayerStateDto } from '@dice/contracts';
 import { ReactNode } from 'react';
 import { Accent, Avatar } from './Avatar';
 import { ProgressBar } from './ProgressBar';
@@ -17,17 +17,18 @@ interface PlayerCardProps {
 
 export function PlayerCard({ player, accent, active, winningScore, footer }: PlayerCardProps) {
   const toGo = Math.max(0, winningScore - player.globalScore);
+  const turnLabel = player.username === BOT_USERNAME ? "Bot's turn" : 'Your turn';
   return (
     <section
       className={`${ui.glass} ${styles.card} ${styles[accent]} ${active ? styles.active : styles.idle}`}
-      aria-label={active ? `${player.username}, your turn` : player.username}
+      aria-label={active ? `${player.username}, ${turnLabel.toLowerCase()}` : player.username}
     >
       <header className={styles.head}>
         <Avatar name={player.username} accent={accent} />
         <div>
           <div className={styles.name}>
             {player.username}
-            {active && <span className={styles.badge}>YOUR TURN</span>}
+            {active && <span className={styles.badge}>{turnLabel.toUpperCase()}</span>}
           </div>
           <div className={styles.sub}>
             🏆 {winsLabel(player.winCount)} · {toGo} to go
