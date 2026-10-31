@@ -293,3 +293,7 @@
 > 
 > - tommorow I will have tech interview on this project :
 >  - what questions to expect to be asked?
+
+### 2026-10-31T06:03:01.990Z : chat
+
+> write me skill which will help me to prepaire in interactive way
