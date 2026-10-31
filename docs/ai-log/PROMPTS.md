@@ -265,3 +265,7 @@
 ### 2026-10-31T04:35:19.295Z : chat
 
 > If I want to add multi players, multiple devices, what's best approach?
+
+### 2026-10-31T04:38:21.740Z : chat
+
+> I prefer sse with cqrs and in future multiple instances of server
