@@ -273,3 +273,23 @@
 ### 2026-10-31T04:42:32.599Z : chat
 
 > isn't it overengineered?
+
+### 2026-10-31T05:54:19.114Z : chat
+
+> this home assignment project  and this was email with the assignment pdf
+> Hi,
+> 
+> Thanks for taking the time to talk with us. 
+> We enjoyed the conversation and we're happy to move you to the next step: attached a short home assignment.
+> 
+> A few notes:
+> - Time: it should take around 2 hours.
+> - Submission: reply to this email with a link to your repo (GitHub/GitLab) or a zip file.
+> 
+> We're not looking for perfection. We care about how you think, how you structure code, and the trade-offs you choose. Add a short README with your assumptions and anything you'd do differently with more time.
+> 
+> We wish you the best of luck, and we're looking forward to seeing what you build.
+> 
+> 
+> - tommorow I will have tech interview on this project :
+>  - what questions to expect to be asked?
