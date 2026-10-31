@@ -269,3 +269,7 @@
 ### 2026-10-31T04:38:21.740Z : chat
 
 > I prefer sse with cqrs and in future multiple instances of server
+
+### 2026-10-31T04:42:32.599Z : chat
+
+> isn't it overengineered?
